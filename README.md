@@ -1,73 +1,163 @@
-# React + TypeScript + Vite
+# Audio Dataset Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+オーディオファイルのデータセット管理ツール
 
-Currently, two official plugins are available:
+## 環境
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node v24.11.1
+- npm 11.6.2
 
-## React Compiler
+## 技術スタック
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- TypeScript
+- Vite
+- ESLint
 
-## Expanding the ESLint configuration
+## プロジェクト構造
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+project-root/
+├── src/
+│   ├── components/          # 再利用可能なコンポーネント
+│   │   ├── ui/             # 基本UIコンポーネント
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Card.tsx
+│   │   │   └── index.ts
+│   │   ├── layout/         # レイアウト
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   └── index.ts
+│   │   └── common/         # 汎用コンポーネント
+│   │       ├── FileUploader.tsx    # ファイルアップロード
+│   │       ├── LoadingSpinner.tsx
+│   │       ├── ErrorMessage.tsx
+│   │       └── index.ts
+│   │
+│   ├── pages/              # ページコンポーネント
+│   │   ├── Home/
+│   │   │   ├── Home.tsx
+│   │   │   ├── components/        # ページ固有のコンポーネント
+│   │   │   │   ├── FileList.tsx
+│   │   │   │   └── FilePreview.tsx
+│   │   │   └── index.ts
+│   │   └── About/
+│   │       ├── About.tsx
+│   │       └── index.ts
+│   │
+│   ├── hooks/              # カスタムフック
+│   │   ├── useFileReader.ts       # ファイル読み込み用
+│   │   ├── useLocalStorage.ts     # ローカルストレージ
+│   │   └── index.ts
+│   │
+│   ├── utils/              # ユーティリティ関数
+│   │   ├── fileParser.ts          # ファイル解析
+│   │   ├── validation.ts          # バリデーション
+│   │   ├── formatters.ts          # フォーマット関数
+│   │   └── index.ts
+│   │
+│   ├── types/              # 型定義
+│   │   ├── file.ts               # ファイル関連の型
+│   │   ├── common.ts             # 共通の型
+│   │   └── index.ts
+│   │
+│   ├── constants/          # 定数
+│   │   ├── fileTypes.ts          # 許可するファイル形式など
+│   │   ├── config.ts             # アプリ設定
+│   │   └── index.ts
+│   │
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+│
+├── public/                 # 静的ファイル
+│   ├── images/
+│   └── favicon.ico
+│
+├── .gitignore
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── eslint.config.js
+└── README.md
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ディレクトリ構成の説明
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### `src/components/`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+再利用可能なコンポーネントを格納
+
+- **ui/**: Button、Input、Card などの基本的な UI コンポーネント
+- **layout/**: Header、Footer、Layout などのレイアウトコンポーネント
+- **common/**: FileUploader、LoadingSpinner、ErrorMessage などの汎用コンポーネント
+
+### `src/pages/`
+
+各ページコンポーネントを格納。ページ固有のコンポーネントは各ページディレクトリ内の`components/`に配置
+
+### `src/hooks/`
+
+カスタムフックを格納
+
+- `useFileReader`: ファイル読み込み処理
+- `useLocalStorage`: ローカルストレージの管理
+
+### `src/utils/`
+
+ユーティリティ関数を格納
+
+- `fileParser`: ファイル解析ロジック
+- `validation`: バリデーション関数
+- `formatters`: データフォーマット関数
+
+### `src/types/`
+
+TypeScript の型定義を格納
+
+- `file.ts`: ファイル関連の型
+- `common.ts`: 共通で使用する型
+
+### `src/constants/`
+
+定数を格納
+
+- `fileTypes.ts`: 許可するファイル形式やサイズ制限
+- `config.ts`: アプリケーション設定
+
+## セットアップ
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+
+# ビルド
+npm run build
+
+# プレビュー
+npm run preview
 ```
+
+## 開発ガイドライン
+
+### コンポーネント作成の原則
+
+1. **単一責任の原則**: 各コンポーネントは 1 つの責任のみを持つ
+2. **再利用性**: 汎用的なコンポーネントは`components/`に配置
+3. **型安全性**: すべての props と state に適切な型を定義
+4. **エクスポート**: 各ディレクトリに`index.ts`を用意してエクスポートを管理
+
+### ファイル命名規則
+
+- コンポーネント: PascalCase（例: `Button.tsx`）
+- ユーティリティ/フック: camelCase（例: `useFileReader.ts`）
+- 定数: camelCase（ファイル名）、UPPER_SNAKE_CASE（変数名）
+
+## ライセンス
+
+MIT
