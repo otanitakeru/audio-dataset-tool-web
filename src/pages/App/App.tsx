@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../components/base-ui";
+import Button from "../../components/base-ui/Button";
 
 function App() {
   const navigate = useNavigate();

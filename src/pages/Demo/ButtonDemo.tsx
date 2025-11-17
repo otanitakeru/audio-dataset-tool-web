@@ -9,7 +9,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { Button } from "../../components/base-ui";
+import Button from "../../components/base-ui/Button";
 
 /**
  * ButtonDemo - ボタンコンポーネントのデモページ

@@ -73,7 +73,7 @@ const StyledButton = styled(MuiButton)(({ theme }) => ({
  * </Button>
  * ```
  */
-export const Button = ({
+const Button = ({
   variant = "contained",
   size = "medium",
   fullWidth = false,
@@ -91,3 +91,5 @@ export const Button = ({
     </StyledButton>
   );
 };
+
+export default Button;
