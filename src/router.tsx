@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
-import App from "./pages/App_TMP/App";
-import ButtonDemo from "./pages/Demo_TMP/ButtonDemo";
+import App from "./pages/app/App";
+import ButtonDemo from "./pages/demo/ButtonDemo";
 
 const AppRouter = () => {
   return (
