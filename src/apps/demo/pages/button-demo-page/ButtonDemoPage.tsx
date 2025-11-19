@@ -1,23 +1,24 @@
-import { useState } from "react";
 import {
+  Alert,
   Box,
+  CircularProgress,
   Container,
-  Typography,
+  Divider,
   Paper,
   Stack,
-  Divider,
-  Alert,
-  CircularProgress,
+  Typography,
 } from "@mui/material";
-import Button from "../../components/base-ui/Button";
+
+import { useState } from "react";
+import Button from "../../../../shared/components/base-ui/Button";
 
 /**
- * ButtonDemo - ボタンコンポーネントのデモページ
+ * ButtonDemoPage - ボタンコンポーネントのデモページ
  *
  * 様々なバリエーションのボタンを表示し、
  * 使用例を確認できるページ
  */
-export default function ButtonDemo() {
+const ButtonDemoPage = () => {
   const [clickCount, setClickCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -237,7 +238,7 @@ export default function ButtonDemo() {
               fontSize: "0.875rem",
             }}
           >
-            {`import { Button } from "@/components/base-ui";
+            {`import { Button } from "@shared/components/base-ui/Button";
 
 // 基本的な使用法
 <Button variant="contained" color="primary" onClick={handleClick}>
@@ -258,4 +259,6 @@ export default function ButtonDemo() {
       </Stack>
     </Container>
   );
-}
+};
+
+export default ButtonDemoPage;

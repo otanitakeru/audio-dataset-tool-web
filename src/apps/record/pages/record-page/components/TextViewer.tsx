@@ -1,4 +1,4 @@
-import type { TextSegment, TextSegmentLine } from "../../types/textSegment";
+import type { TextSegment, TextSegmentLine } from "../../../types/textSegment";
 
 const getTextSegments = (): TextSegmentLine => {
   return [
