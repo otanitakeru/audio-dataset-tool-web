@@ -2,162 +2,83 @@
 
 オーディオファイルのデータセット管理ツール
 
-## 環境
+## 環境構築
 
-- Node v24.11.1
-- npm 11.6.2
+本プロジェクトでは、Node.js のバージョン管理に `nodenv` (および `anyenv`) を使用することを推奨しています。
+
+### 1. 前提ツールのインストール
+
+まだ `anyenv` や `nodenv` を導入していない場合は、以下の記事などを参考に環境をセットアップしてください。
+
+- [anyenv + nodenv で Node.js 環境を構築する](https://zenn.dev/ryuu/articles/use-anyversions)
+- [nodenv を使って Node.js を管理する](https://qiita.com/ksh-fthr/items/274880429822c8e3836d)
+
+### 2. Node.js のセットアップ
+
+本プロジェクトで指定されている Node.js のバージョン（v24.11.1）をインストールし、適用します。
+
+```bash
+# 指定バージョンのインストール
+nodenv install 24.11.1
+
+# バージョンの適用
+# 注: プロジェクト内のみで有効にする場合は global ではなく local を推奨します
+nodenv global 24.11.1
+nodenv rehash
+```
+
+#### 補足
+
+特定のディレクトリ（このプロジェクト内）だけでバージョンを有効にしたい場合は、`global` の代わりに `local` を使用してください。
+
+```bash
+nodenv local 24.11.1
+```
+
+### 3. 依存パッケージのインストール
+
+Node.js のセットアップ後、プロジェクトに必要なライブラリをインストールします。
+
+```bash
+npm install
+# または yarn install / pnpm install
+```
+
+## 起動方法
+
+環境構築完了後、以下のコマンドでアプリケーションを起動します。
+
+```bash
+bash scripts/run.sh
+```
 
 ## 技術スタック
 
 - React 19
 - TypeScript
 - Vite
+- Material-UI (MUI)
+- React Router
 - ESLint
 
-## プロジェクト構造
-
-```
-project-root/
-├── src/
-│   ├── components/          # 再利用可能なコンポーネント
-│   │   ├── ui/             # 基本UIコンポーネント
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Card.tsx
-│   │   │   └── index.ts
-│   │   ├── layout/         # レイアウト
-│   │   │   ├── Header.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   ├── Layout.tsx
-│   │   │   └── index.ts
-│   │   └── common/         # 汎用コンポーネント
-│   │       ├── FileUploader.tsx    # ファイルアップロード
-│   │       ├── LoadingSpinner.tsx
-│   │       ├── ErrorMessage.tsx
-│   │       └── index.ts
-│   │
-│   ├── pages/              # ページコンポーネント
-│   │   ├── Home/
-│   │   │   ├── Home.tsx
-│   │   │   ├── components/        # ページ固有のコンポーネント
-│   │   │   │   ├── FileList.tsx
-│   │   │   │   └── FilePreview.tsx
-│   │   │   └── index.ts
-│   │   └── About/
-│   │       ├── About.tsx
-│   │       └── index.ts
-│   │
-│   ├── hooks/              # カスタムフック
-│   │   ├── useFileReader.ts       # ファイル読み込み用
-│   │   ├── useLocalStorage.ts     # ローカルストレージ
-│   │   └── index.ts
-│   │
-│   ├── utils/              # ユーティリティ関数
-│   │   ├── fileParser.ts          # ファイル解析
-│   │   ├── validation.ts          # バリデーション
-│   │   ├── formatters.ts          # フォーマット関数
-│   │   └── index.ts
-│   │
-│   ├── types/              # 型定義
-│   │   ├── file.ts               # ファイル関連の型
-│   │   ├── common.ts             # 共通の型
-│   │   └── index.ts
-│   │
-│   ├── constants/          # 定数
-│   │   ├── fileTypes.ts          # 許可するファイル形式など
-│   │   ├── config.ts             # アプリ設定
-│   │   └── index.ts
-│   │
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-│
-├── public/                 # 静的ファイル
-│   ├── images/
-│   └── favicon.ico
-│
-├── .gitignore
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── eslint.config.js
-└── README.md
-```
-
-## ディレクトリ構成の説明
-
-### `src/components/`
-
-再利用可能なコンポーネントを格納
-
-- **ui/**: Button、Input、Card などの基本的な UI コンポーネント
-- **layout/**: Header、Footer、Layout などのレイアウトコンポーネント
-- **common/**: FileUploader、LoadingSpinner、ErrorMessage などの汎用コンポーネント
-
-### `src/pages/`
-
-各ページコンポーネントを格納。ページ固有のコンポーネントは各ページディレクトリ内の`components/`に配置
-
-### `src/hooks/`
-
-カスタムフックを格納
-
-- `useFileReader`: ファイル読み込み処理
-- `useLocalStorage`: ローカルストレージの管理
-
-### `src/utils/`
-
-ユーティリティ関数を格納
-
-- `fileParser`: ファイル解析ロジック
-- `validation`: バリデーション関数
-- `formatters`: データフォーマット関数
-
-### `src/types/`
-
-TypeScript の型定義を格納
-
-- `file.ts`: ファイル関連の型
-- `common.ts`: 共通で使用する型
-
-### `src/constants/`
-
-定数を格納
-
-- `fileTypes.ts`: 許可するファイル形式やサイズ制限
-- `config.ts`: アプリケーション設定
-
-## セットアップ
+## 利用可能なコマンド
 
 ```bash
-# 依存関係のインストール
-npm install
-
 # 開発サーバーの起動
 npm run dev
 
-# ビルド
+# 本番ビルド
 npm run build
 
-# プレビュー
+# ESLintの実行
+npm run lint
+
+# ビルド結果のプレビュー
 npm run preview
 ```
 
-## 開発ガイドライン
-
-### コンポーネント作成の原則
-
-1. **単一責任の原則**: 各コンポーネントは 1 つの責任のみを持つ
-2. **再利用性**: 汎用的なコンポーネントは`components/`に配置
-3. **型安全性**: すべての props と state に適切な型を定義
-4. **エクスポート**: 各ディレクトリに`index.ts`を用意してエクスポートを管理
-
-### ファイル命名規則
-
-- コンポーネント: PascalCase（例: `Button.tsx`）
-- ユーティリティ/フック: camelCase（例: `useFileReader.ts`）
-- 定数: camelCase（ファイル名）、UPPER_SNAKE_CASE（変数名）
-
 ## ライセンス
 
-MIT
+MIT License
+
+詳細は [LICENSE](LICENSE) ファイルを参照してください。
