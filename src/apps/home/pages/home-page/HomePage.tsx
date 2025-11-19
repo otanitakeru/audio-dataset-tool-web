@@ -63,15 +63,17 @@ const HomePage = () => {
               actionText="編集画面へ"
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <FeatureCard
-              title="デモ"
-              description="UIコンポーネントの動作確認や、各機能のインタラクティブなテストが行えます。"
-              icon={<PlayCircleOutline sx={{ fontSize: 32 }} />}
-              onClick={() => navigate("/demo")}
-              actionText="デモ画面へ"
-            />
-          </Grid>
+          {import.meta.env.DEV && (
+            <Grid size={{ xs: 12, md: 4 }}>
+              <FeatureCard
+                title="デモ"
+                description="UIコンポーネントの動作確認や、各機能のインタラクティブなテストが行えます。"
+                icon={<PlayCircleOutline sx={{ fontSize: 32 }} />}
+                onClick={() => navigate("/demo")}
+                actionText="デモ画面へ"
+              />
+            </Grid>
+          )}
         </Grid>
       </Container>
     </Box>
