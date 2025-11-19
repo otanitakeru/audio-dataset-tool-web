@@ -1,13 +1,7 @@
 import type { TextSegment, TextSegmentLine } from "../../../types/textSegment";
 
-const getTextSegments = (): TextSegmentLine => {
-  return [
-    { type: "plain", text: "こんにちは" },
-    { type: "ruby", data: { base: "本日", ruby: "ほんじつ" } },
-    { type: "plain", text: "は" },
-    { type: "ruby", data: { base: "日曜日", ruby: "にちようび" } },
-    { type: "plain", text: "です。" },
-  ];
+type TextViewerProps = {
+  textSegments: TextSegmentLine;
 };
 
 const renderText = (text: TextSegmentLine): React.ReactNode => {
@@ -24,8 +18,8 @@ const renderText = (text: TextSegmentLine): React.ReactNode => {
   });
 };
 
-const TextViewer = () => {
-  return <div>{renderText(getTextSegments())}</div>;
+const TextViewer = ({ textSegments }: TextViewerProps) => {
+  return <div>{renderText(textSegments)}</div>;
 };
 
 export default TextViewer;
