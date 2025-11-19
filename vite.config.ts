@@ -12,7 +12,7 @@ export default defineConfig({
           "vendor-react": ["react", "react-dom", "react-router-dom"],
           "vendor-mui": ["@mui/material", "@emotion/react", "@emotion/styled"],
           "app-record": ["./src/apps/record/router.tsx"],
-          "app-cut": ["./src/apps/cut/router.tsx"],
+          "app-edit": ["./src/apps/edit/router.tsx"],
         },
       },
     },
