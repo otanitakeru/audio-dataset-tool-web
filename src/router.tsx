@@ -7,6 +7,9 @@ const HomeRouter = lazy(() => import("./apps/home/router"));
 const RecordRouter = lazy(() => import("./apps/record/router"));
 const EditRouter = lazy(() => import("./apps/edit/router"));
 const DemoRouter = lazy(() => import("./apps/demo/router"));
+const NotFoundPage = lazy(
+  () => import("./shared/pages/not-found-page/NotFoundPage")
+);
 
 const LoadingFallback = () => (
   <Box
@@ -38,6 +41,9 @@ const AppRouter = () => {
           {import.meta.env.DEV && (
             <Route path="/demo/*" element={<DemoRouter />} />
           )}
+
+          {/* 404 Page */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </AppLayout>
