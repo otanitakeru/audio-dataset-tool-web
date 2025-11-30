@@ -1,54 +1,19 @@
-import { NavigateBefore, NavigateNext } from "@mui/icons-material";
-import {
-  Box,
-  Container,
-  IconButton,
-  Paper,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import type { TextSegmentLine } from "../../types/textSegment";
-import TextViewer from "./components/TextViewer";
-
-const getTextSegments = (): TextSegmentLine[] => {
-  return [
-    [
-      { type: "plain", text: "こんにちは" },
-      { type: "ruby", data: { base: "本日", ruby: "ほんじつ" } },
-      { type: "plain", text: "は" },
-      { type: "ruby", data: { base: "日曜日", ruby: "にちようび" } },
-      { type: "plain", text: "です。" },
-    ],
-    [
-      { type: "plain", text: "この" },
-      { type: "ruby", data: { base: "文章", ruby: "ぶんしょう" } },
-      { type: "plain", text: "は" },
-      { type: "ruby", data: { base: "長", ruby: "なが" } },
-      { type: "plain", text: "い" },
-      { type: "ruby", data: { base: "文章", ruby: "ぶんしょう" } },
-      { type: "plain", text: "の" },
-      { type: "ruby", data: { base: "一行目", ruby: "いちぎょうめ" } },
-      { type: "plain", text: "です。" },
-    ],
-    [
-      { type: "plain", text: "これは" },
-      { type: "ruby", data: { base: "短", ruby: "みじか" } },
-      { type: "plain", text: "い" },
-      { type: "ruby", data: { base: "例", ruby: "れい" } },
-      { type: "plain", text: "です。" },
-    ],
-  ];
-};
+import { getTextSegments } from "../../data/mockData";
+import { Card } from "./components/Card";
+import { NavigationButton } from "./components/NavigationButton";
+import { Progress } from "./components/Progress";
+import { TextDisplay } from "./components/TextDisplay";
 
 const RecordPage = () => {
-  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const textSegments = getTextSegments();
+  const hasData = textSegments.length > 0;
 
-  const currentSegment = textSegments[currentIndex];
+  const currentSegment = hasData ? textSegments[currentIndex] : [];
   const isFirst = currentIndex === 0;
-  const isLast = currentIndex === textSegments.length - 1;
+  const isLast = !hasData || currentIndex === textSegments.length - 1;
 
   const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
@@ -62,6 +27,8 @@ const RecordPage = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!hasData) return;
+
       if (event.key === "ArrowLeft") {
         handlePrevious();
       } else if (event.key === "ArrowRight") {
@@ -71,11 +38,10 @@ const RecordPage = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleNext, handlePrevious]);
+  }, [handleNext, handlePrevious, hasData]);
 
-  // マウント時にヘッダー分スクロールして隠す
   useEffect(() => {
-    // AppLayoutのscrollTo(0,0)と競合しないように少し遅延させる
+    // HACK: ヘッダー分スクロールして隠すため、AppLayoutのscrollTo(0,0)と競合しないように少し遅延させる
     const timer = setTimeout(() => {
       const header = document.querySelector("header");
       if (header) {
@@ -107,11 +73,7 @@ const RecordPage = () => {
         }}
       >
         {/* Status Header */}
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Typography variant="subtitle1" color="text.secondary">
-            {currentIndex + 1} / {textSegments.length}
-          </Typography>
-        </Box>
+        <Progress current={currentIndex + 1} total={textSegments.length} />
 
         {/* Main Content Area */}
         <Box
@@ -124,94 +86,35 @@ const RecordPage = () => {
           }}
         >
           {/* Previous Button */}
-          <IconButton
+          <NavigationButton
             onClick={handlePrevious}
             disabled={isFirst}
-            sx={{
-              alignSelf: "center",
-              width: 64,
-              height: 64,
-              bgcolor: "background.paper",
-              boxShadow: 3,
-              "&:hover": {
-                bgcolor: "background.paper",
-                transform: "scale(1.05)",
-              },
-              "&:disabled": {
-                opacity: 0.5,
-                boxShadow: "none",
-              },
-              transition: "all 0.2s",
-            }}
-            aria-label="previous sentence"
-          >
-            <NavigateBefore sx={{ fontSize: 40 }} />
-          </IconButton>
+            direction="prev"
+          />
 
           {/* Text Display Card */}
-          <Paper
-            elevation={4}
-            sx={{
-              flex: 1,
-              p: 6,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 4,
-              position: "relative",
-              overflow: "auto", // コンテンツが多い場合はスクロール
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "4px",
-                background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              },
-            }}
-          >
-            <Box
-              sx={{
-                typography: "h2", // サイズを大きく
-                lineHeight: 2,
-                textAlign: "center",
-                "& rt": {
-                  fontSize: "0.5em",
-                  color: "text.secondary",
-                },
-              }}
-            >
-              <TextViewer textSegments={currentSegment} />
-            </Box>
-          </Paper>
+          {hasData ? (
+            <Card>
+              <TextDisplay textSegments={currentSegment} />
+            </Card>
+          ) : (
+            <Card>
+              <Typography
+                variant="h4"
+                color="text.primary"
+                sx={{ textAlign: "center" }}
+              >
+                データをうまく読み込めませんでした。
+              </Typography>
+            </Card>
+          )}
 
           {/* Next Button */}
-          <IconButton
+          <NavigationButton
             onClick={handleNext}
             disabled={isLast}
-            sx={{
-              alignSelf: "center",
-              width: 64,
-              height: 64,
-              bgcolor: theme.palette.primary.main,
-              color: "common.white",
-              boxShadow: 4,
-              "&:hover": {
-                bgcolor: theme.palette.primary.dark,
-                transform: "scale(1.05)",
-              },
-              "&:disabled": {
-                bgcolor: "action.disabledBackground",
-                color: "action.disabled",
-                boxShadow: "none",
-              },
-              transition: "all 0.2s",
-            }}
-            aria-label="next sentence"
-          >
-            <NavigateNext sx={{ fontSize: 40 }} />
-          </IconButton>
+            direction="next"
+          />
         </Box>
 
         {/* Helper Text */}

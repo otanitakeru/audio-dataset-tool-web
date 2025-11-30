@@ -49,7 +49,7 @@ npm install
 環境構築完了後、以下のコマンドでアプリケーションを起動します。
 
 ```bash
-bash scripts/run.sh
+npm run dev
 ```
 
 ## 技術スタック
