@@ -24,9 +24,7 @@
 
 ```mermaid
 %%{init: {
-    'gitGraph': {
-        'mainBranchName': 'master',
-        'rotateCommitLabel': false },
+    'gitGraph': {'mainBranchName': 'master'},
     'theme': 'base',
     'themeVariables': { 'commitLabelFontSize': '14px' }
 } }%%
