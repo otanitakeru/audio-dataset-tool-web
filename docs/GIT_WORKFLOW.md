@@ -9,7 +9,7 @@
 本プロジェクトは **Record チーム** と **Edit チーム** による並行開発を行います。
 開発の安全性とシンプルさを重視し、以下の原則を採用します。
 
-- **ブランチ戦略**: **GitHub Flow** ベース（`master` + `feature/*`）
+- **ブランチ戦略**: **GitHub Flow** ベース（`master` + `アプリ名/*`）
 - **履歴管理**: **Merge (マージ)** を基本とし、安全に履歴を残す
 - **コミット規約**: **Conventional Commits**
 - **並行開発**: アプリ単位（`apps/record`, `apps/edit`）で独立性を保ちつつ開発
@@ -32,8 +32,8 @@ gitGraph
    commit id: "init"
 
    %% Recordチームの開発
-   branch feature/record/new-ui
-   checkout feature/record/new-ui
+   branch record/feat/new-ui
+   checkout record/feat/new-ui
    commit id: "feat: UI実装"
 
    %% その間にmasterが進む（他チームの修正など）
@@ -41,36 +41,47 @@ gitGraph
    commit id: "fix: 共通バグ修正"
 
    %% 作業ブランチにmasterを取り込む (Sync)
-   checkout feature/record/new-ui
+   checkout record/feat/new-ui
    merge master id: "merge master"
    commit id: "feat: 機能完成"
 
    %% masterへマージ
    checkout master
-   merge feature/record/new-ui id: "PR Merge"
+   merge record/feat/new-ui id: "PR Merge"
 ```
 
 - **Merge の特徴**: 分岐と合流の履歴が明確に残ります。`rebase` は使用せず、安全な `merge` を使用します。
 
 ### ブランチの種類と役割
 
-| ブランチ名         | 役割                                                         | 親ブランチ | マージ先 |
-| :----------------- | :----------------------------------------------------------- | :--------- | :------- |
-| `master`           | **プロダクションコード**<br>常にデプロイ可能で動作する状態。 | -          | -        |
-| `feature/{app}/*`  | **新機能開発**<br>`{app}` は `record`, `edit` などを指定。   | `master`   | `master` |
-| `fix/{app}/*`      | **バグ修正**<br>緊急度が高い修正や通常のバグ対応。           | `master`   | `master` |
-| `refactor/{app}/*` | **リファクタリング**<br>機能変更を伴わないコード改善。       | `master`   | `master` |
-| `perf/{app}/*`     | **パフォーマンス改善**<br>速度や効率の最適化。               | `master`   | `master` |
-| `docs/*`           | **ドキュメント更新**<br>README やガイドラインの変更。        | `master`   | `master` |
-| `shared/*`         | **共通リソース変更**<br>`shared/` 配下や設定ファイルの変更。 | `master`   | `master` |
+| ブランチ名         | 役割                                                           | 親ブランチ | マージ先 |
+| :----------------- | :------------------------------------------------------------- | :--------- | :------- |
+| `master`           | **プロダクションコード**<br>常にデプロイ可能で動作する状態。   | -          | -        |
+| `{app}/feat/*`     | **新機能開発**<br>`{app}` は `record`, `edit`, `shared` など。 | `master`   | `master` |
+| `{app}/fix/*`      | **バグ修正**<br>緊急度が高い修正や通常のバグ対応。             | `master`   | `master` |
+| `{app}/refactor/*` | **リファクタリング**<br>機能変更を伴わないコード改善。         | `master`   | `master` |
+| `{app}/perf/*`     | **パフォーマンス改善**<br>速度や効率の最適化。                 | `master`   | `master` |
+| `docs/*`           | **ドキュメント更新**<br>ドキュメントのみの変更。               | `master`   | `master` |
 
-### 命名規則の具体例
+### ブランチ命名規則
 
-| チーム     | ブランチ名の例                                               | 説明                             |
-| :--------- | :----------------------------------------------------------- | :------------------------------- |
-| **Record** | `feature/record/audio-recorder`<br>`fix/record/playback-bug` | Record アプリ機能の開発・修正    |
-| **Edit**   | `feature/edit/text-editor`<br>`perf/edit/rendering`          | Edit アプリ機能の開発・改善      |
-| **共通**   | `shared/ui-button-update`<br>`docs/update-workflow`          | 共有コンポーネントやドキュメント |
+アプリ（スコープ）を先頭にし、その後にタイプ、内容を記述する **「アプリ名/タイプ/内容」** の形式を採用します。
+
+**フォーマット**: `{app}/{type}/{description}`
+
+| セグメント      | 説明                                     | 例                                 |
+| :-------------- | :--------------------------------------- | :--------------------------------- |
+| `{app}`         | 変更対象のアプリやスコープ               | `record`, `edit`, `shared`, `docs` |
+| `{type}`        | 変更の種類 (Conventional Commits に準拠) | `feat`, `fix`, `refactor`, `perf`  |
+| `{description}` | 具体的な変更内容 (ケバブケース)          | `new-ui`, `fix-playback`           |
+
+### 具体的な運用例
+
+| チーム     | ブランチ名の例                                                | 親ブランチ | マージ先 |
+| :--------- | :------------------------------------------------------------ | :--------- | :------- |
+| **Record** | `record/feat/audio-recorder`<br>`record/fix/playback-bug`     | `master`   | `master` |
+| **Edit**   | `edit/feat/text-editor`<br>`edit/perf/rendering`              | `master`   | `master` |
+| **共通**   | `shared/feat/ui-button-update`<br>`docs/feat/update-workflow` | `master`   | `master` |
 
 ---
 
@@ -93,7 +104,7 @@ git checkout master
 git pull origin master
 
 # 2. 作業ブランチを作成 (例: Recordチーム)
-git checkout -b feature/record/new-feature
+git checkout -b record/feat/new-feature
 ```
 
 #### 2. 開発とコミット
@@ -110,7 +121,7 @@ git commit -m "feat(record): 基本的なUIを実装"
 作業内容をリモートリポジトリへアップロードします。
 
 ```bash
-git push origin feature/record/new-feature
+git push origin record/feat/new-feature
 ```
 
 #### 4. Pull Request (PR) 作成 & マージ
@@ -138,7 +149,7 @@ git pull origin master
 自分のブランチに `master` の変更を取り込みます。
 
 ```bash
-git checkout feature/record/new-feature
+git checkout record/feat/new-feature
 git merge master
 ```
 
@@ -164,7 +175,7 @@ git merge master
 Merge は履歴を書き換えないため、強制プッシュ（`--force`）は不要です。
 
 ```bash
-git push origin feature/record/new-feature
+git push origin record/feat/new-feature
 ```
 
 ---
@@ -229,21 +240,21 @@ PR のタイトルとコミットメッセージは、レビュアーや将来�
 
 ```bash
 # 1. 変更内容を退避して新しいブランチを作成・移動
-git branch feature/record/forgotten-branch
-git checkout feature/record/forgotten-branch
+git branch record/feat/forgotten-branch
+git checkout record/feat/forgotten-branch
 
 # 2. master を元の状態に戻す（origin/master と同期）
 git branch -f master origin/master
 
 # 3. 新しいブランチをプッシュ
-git push origin feature/record/forgotten-branch
+git push origin record/feat/forgotten-branch
 ```
 
 ### シナリオ B: 共通コンポーネントを修正したい
 
 `apps/record` で使いたい機能が `shared/components/Button` に足りない場合。
 
-1. ブランチ `shared/button-update` を作成
+1. ブランチ `shared/feat/button-update` を作成
 2. `src/shared/components/Button` を修正
 3. `feat(shared): Buttonにloadingプロパティを追加` でコミット
 4. PR を作成し、タイトルを `[Shared] feat: Button更新` とする
