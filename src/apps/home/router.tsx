@@ -7,6 +7,7 @@ const HomeRouter = () => {
   return (
     <Routes>
       <Route index element={<HomePage />} />
+      <Route path="/*" element={<HomePage />} />
     </Routes>
   );
 };

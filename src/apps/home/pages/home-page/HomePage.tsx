@@ -17,7 +17,6 @@ const HomePage = () => {
       }}
     >
       <Container maxWidth="lg">
-        {/* Hero Section */}
         <Box sx={{ textAlign: "center", mb: 10 }}>
           <Typography
             variant="h2"

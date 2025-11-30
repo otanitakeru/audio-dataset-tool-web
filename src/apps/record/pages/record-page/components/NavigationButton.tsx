@@ -24,19 +24,17 @@ export const NavigationButton = ({
         width: 64,
         height: 64,
         bgcolor: isNext ? theme.palette.primary.main : "background.paper",
-        color: isNext ? "common.white" : undefined,
+        color: isNext ? "common.white" : "primary.main",
         boxShadow: isNext ? 4 : 3,
         "&:hover": {
           bgcolor: isNext ? theme.palette.primary.dark : "background.paper",
           transform: "scale(1.05)",
         },
         "&:disabled": {
-          // Next button specific disabled styles
           ...(isNext && {
             bgcolor: "action.disabledBackground",
             color: "action.disabled",
           }),
-          // Previous button specific disabled styles
           ...(!isNext && {
             opacity: 0.5,
           }),

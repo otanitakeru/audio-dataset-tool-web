@@ -28,8 +28,7 @@ const AppRouter = () => {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Main アプリケーション */}
-
-          <Route index element={<HomeRouter />} />
+          <Route path="/*" element={<HomeRouter />} />
 
           {/* Record アプリケーション */}
           <Route path="/record/*" element={<RecordRouter />} />
@@ -37,13 +36,13 @@ const AppRouter = () => {
           {/* Edit アプリケーション */}
           <Route path="/edit/*" element={<EditRouter />} />
 
+          {/* 404 Page */}
+          <Route path="*" element={<NotFoundPage />} />
+
           {/* Demo アプリケーション */}
           {import.meta.env.DEV && (
             <Route path="/demo/*" element={<DemoRouter />} />
           )}
-
-          {/* 404 Page */}
-          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </AppLayout>

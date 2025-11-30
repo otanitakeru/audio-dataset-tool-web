@@ -38,5 +38,41 @@ export const theme = createTheme({
         },
       },
     },
+
+    /**
+     * Button
+     */
+    MuiButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          textTransform: "none",
+          fontWeight: 500,
+          borderRadius: theme.spacing(1),
+          padding: theme.spacing(1, 2),
+          transition: "all 0.3s ease-in-out",
+        }),
+        sizeSmall: ({ theme }) => ({
+          padding: theme.spacing(0.5, 1.5),
+          fontSize: "0.875rem",
+        }),
+        sizeLarge: ({ theme }) => ({
+          padding: theme.spacing(1.5, 3),
+          fontSize: "1rem",
+        }),
+        contained: ({ theme }) => ({
+          boxShadow: theme.shadows[2],
+          color: "white",
+          "&:hover": {
+            backgroundColor: theme.palette.primary.dark,
+          },
+        }),
+        outlined: {
+          borderWidth: "2px",
+          "&:hover": {
+            borderWidth: "2px",
+          },
+        },
+      },
+    },
   },
 });

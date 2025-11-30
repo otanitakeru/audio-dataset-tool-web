@@ -1,12 +1,12 @@
 import {
   alpha,
   Box,
+  Button,
   Card,
   CardContent,
   Typography,
   useTheme,
 } from "@mui/material";
-import Button from "../../../../../shared/components/base-ui/Button";
 
 interface FeatureCardProps {
   title: string;
