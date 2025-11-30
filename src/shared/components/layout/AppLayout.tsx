@@ -13,9 +13,12 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
   }, [pathname]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-      <Box component="main" sx={{ py: 1, minHeight: "100vh" }}>
+      <Box
+        component="main"
+        sx={{ flex: 1, display: "flex", flexDirection: "column" }}
+      >
         {children}
       </Box>
       <Footer />

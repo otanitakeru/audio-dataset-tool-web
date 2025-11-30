@@ -1,12 +1,10 @@
-import { useNavigate } from "react-router-dom";
-import Button from "../../../../shared/components/base-ui/Button";
+import { Box } from "@mui/material";
 
 const DemoPage = () => {
-  const navigate = useNavigate();
   return (
-    <>
-      <Button onClick={() => navigate("/demo/button")}>Button Demo</Button>
-    </>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", flex: 1, py: 4 }}
+    ></Box>
   );
 };
 
