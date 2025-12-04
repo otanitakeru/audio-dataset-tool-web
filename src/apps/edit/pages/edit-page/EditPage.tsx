@@ -1,22 +1,21 @@
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SettingsIcon from "@mui/icons-material/Settings";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import {
   Box,
   Button,
-  FormControlLabel,
+  IconButton,
   Paper,
   Stack,
-  Switch,
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import Minimap from "wavesurfer.js/dist/plugins/minimap.esm.js";
 import Timeline from "wavesurfer.js/dist/plugins/timeline.esm.js";
-
-// 停止時の挙動設定用型
-type StopBehavior = "pause_at_current" | "return_to_start";
+import { SettingsDialog } from "./components/SettingsDialog";
+import type { CursorBehavior, StopBehavior } from "./types";
 
 const EditPage: React.FC = () => {
   // Refs
@@ -31,6 +30,18 @@ const EditPage: React.FC = () => {
     useState<StopBehavior>("pause_at_current");
   const [playbackStartPosition, setPlaybackStartPosition] = useState<number>(0);
   const [isReady, setIsReady] = useState(false);
+  const [activeDialog, setActiveDialog] = useState<"settings" | null>(null);
+  const [cursorBehavior, setCursorBehavior] =
+    useState<CursorBehavior>("fixed_center");
+
+  // カーソル挙動の変更を反映
+  useEffect(() => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.setOptions({
+        autoCenter: cursorBehavior === "fixed_center",
+      });
+    }
+  }, [cursorBehavior]);
 
   // ファイル読み込みハンドラー
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +131,8 @@ const EditPage: React.FC = () => {
   // キーボードショートカットとマウスイベントの制御
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeDialog) return;
+
       const ws = wavesurferRef.current;
       if (!ws) return;
 
@@ -148,7 +161,7 @@ const EditPage: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomLevel, handleStop]);
+  }, [zoomLevel, handleStop, activeDialog]);
 
   // マウスホイールイベント (Ctrl+Scrollで拡大縮小, Shift+Scrollで左右移動)
   // 注意: ReactのonWheelではなく、passive: falseオプションが必要なためDOMイベントを使用
@@ -187,10 +200,6 @@ const EditPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 4, maxWidth: "1200px", margin: "0 auto" }}>
-      <Typography variant="h4" gutterBottom>
-        Web Audio Editor (React 19 + Wavesurfer v7)
-      </Typography>
-
       <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
         {/* コントロールエリア */}
         <Stack direction="row" spacing={2} alignItems="center" mb={2}>
@@ -198,6 +207,7 @@ const EditPage: React.FC = () => {
             variant="contained"
             component="label"
             startIcon={<UploadFileIcon />}
+            disabled={!!activeDialog}
           >
             オーディオをロード
             <input
@@ -215,26 +225,19 @@ const EditPage: React.FC = () => {
               isPlaying ? handleStop() : wavesurferRef.current?.play()
             }
             startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-            disabled={!isReady}
+            disabled={!isReady || !!activeDialog}
           >
             {isPlaying ? "停止 (Space)" : "再生 (Space)"}
           </Button>
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={stopBehavior === "return_to_start"}
-                onChange={(e) =>
-                  setStopBehavior(
-                    e.target.checked ? "return_to_start" : "pause_at_current"
-                  )
-                }
-              />
-            }
-            label="停止時に開始位置に戻る"
-          />
+          <IconButton
+            onClick={() => setActiveDialog("settings")}
+            disabled={isPlaying || !!activeDialog}
+          >
+            <SettingsIcon />
+          </IconButton>
         </Stack>
 
         <Typography variant="caption" display="block" gutterBottom>
@@ -269,12 +272,17 @@ const EditPage: React.FC = () => {
           )}
         </Box>
       </Paper>
+
+      <SettingsDialog
+        open={activeDialog === "settings"}
+        onClose={() => setActiveDialog(null)}
+        stopBehavior={stopBehavior}
+        setStopBehavior={setStopBehavior}
+        cursorBehavior={cursorBehavior}
+        setCursorBehavior={setCursorBehavior}
+      />
     </Box>
   );
 };
-
-// function EditPage() {
-//   return <>編集ページ</>;
-// }
 
 export default EditPage;
