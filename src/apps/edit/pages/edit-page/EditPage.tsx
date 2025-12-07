@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { mockLabels } from "../../constants/mockLabels";
-import type { CursorBehavior, StopBehavior } from "../../types";
+import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
 import type { LabelEditorRef } from "./components/LabelEditor";
 import { LabelEditor } from "./components/LabelEditor";
@@ -33,13 +33,16 @@ const EditPage: React.FC = () => {
   const [stopBehavior, setStopBehavior] =
     useState<StopBehavior>("pause_at_current");
   const [isReady, setIsReady] = useState(false);
-  const [activeDialog, setActiveDialog] = useState<"settings" | null>(null);
+  const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [cursorBehavior, setCursorBehavior] =
     useState<CursorBehavior>("fixed_center");
 
   // ファイル読み込みハンドラー
+  // オーディオファイルが選択されたときに実行される。
+  // オーディオファイルをWaveformEditorに読み込む
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]; // 選択されたファイル（の最初のファイル）
+    // ファイルが存在し、WaveformEditorのrefが有効なら読み込む
     if (file && waveformEditorRef.current) {
       const url = URL.createObjectURL(file);
       currentAudioUrlRef.current = url;
@@ -49,7 +52,9 @@ const EditPage: React.FC = () => {
 
   // WaveformEditorからのイベントハンドラー
   const handleWaveformReady = () => {
-    setIsReady(true);
+    // WaveformEditorが準備完了したときに呼ばれる
+    setIsReady(true); // isReadyをtrueに設定
+    // 必要なすべてのRefが存在するか確認
     if (
       waveformEditorRef.current &&
       labelEditorRef.current &&
@@ -71,6 +76,7 @@ const EditPage: React.FC = () => {
   // キーボードショートカットとマウスイベントの制御
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // もし設定画面などを開いていたら、音声編集を行うためのショートカットは無効化
       if (activeDialog) return;
 
       const editor = waveformEditorRef.current;
@@ -79,6 +85,7 @@ const EditPage: React.FC = () => {
       // スペースキー: 再生/停止
       if (e.code === "Space") {
         e.preventDefault(); // スクロール防止
+        // 再生/停止切り替え
         if (editor.isPlaying()) {
           editor.pause();
         } else {
