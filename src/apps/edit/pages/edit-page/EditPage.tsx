@@ -51,26 +51,36 @@ const EditPage: React.FC = () => {
   };
 
   // WaveformEditorからのイベントハンドラー
+  // WaveformEditorの準備が完了したら、LabelEditorにもオーディオを読み込む
   const handleWaveformReady = () => {
-    // WaveformEditorが準備完了したときに呼ばれる
     setIsReady(true); // isReadyをtrueに設定
-    // 必要なすべてのRefが存在するか確認
     if (
       waveformEditorRef.current &&
       labelEditorRef.current &&
       currentAudioUrlRef.current
     ) {
+      // LabelEditorにも同じオーディオを読み込む
+      // WaveformEditorの準備が完了していないとdurationが取得できない可能性があるのでここで読み込む
       const duration = waveformEditorRef.current.getDuration();
       labelEditorRef.current.load(currentAudioUrlRef.current, duration);
     }
   };
 
+  // WaveformEditorのスクロール位置が変わったときにLabelEditorのスクロール位置を同期する
   const handleWaveformScroll = (scrollLeft: number) => {
     labelEditorRef.current?.syncScroll(scrollLeft);
   };
 
+  // WaveformEditorの再生位置が変わったときにLabelEditorのカーソル位置を同期する
   const handleWaveformTimeUpdate = (time: number) => {
     labelEditorRef.current?.syncCursor(time);
+  };
+
+  const handleWaveformZoom = (delta: number) => {
+    setZoomLevel((prev) => {
+      const newZoom = Math.max(10, Math.min(1000, prev + delta));
+      return newZoom;
+    });
   };
 
   // キーボードショートカットとマウスイベントの制御
@@ -79,6 +89,7 @@ const EditPage: React.FC = () => {
       // もし設定画面などを開いていたら、音声編集を行うためのショートカットは無効化
       if (activeDialog) return;
 
+      // 音声波形エディタの準備が完了していなかったらショートカットは無効化
       const editor = waveformEditorRef.current;
       if (!editor) return;
 
@@ -168,6 +179,7 @@ const EditPage: React.FC = () => {
           onFinish={() => setIsPlaying(false)}
           onScroll={handleWaveformScroll}
           onTimeUpdate={handleWaveformTimeUpdate}
+          onZoom={handleWaveformZoom}
         />
 
         <Box sx={{ mt: 1 }}>

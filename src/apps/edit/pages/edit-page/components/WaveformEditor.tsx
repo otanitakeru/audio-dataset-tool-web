@@ -32,6 +32,7 @@ interface WaveformEditorProps {
   onFinish: () => void;
   onScroll: (scrollLeft: number) => void;
   onTimeUpdate: (time: number) => void;
+  onZoom: (delta: number) => void;
 }
 
 export const WaveformEditor = forwardRef<
@@ -49,6 +50,7 @@ export const WaveformEditor = forwardRef<
       onFinish,
       onScroll,
       onTimeUpdate,
+      onZoom,
     },
     ref
   ) => {
@@ -95,6 +97,28 @@ export const WaveformEditor = forwardRef<
         ws.setTime(playbackStartPosition);
       }
     }, [playbackStartPosition, stopBehavior]);
+
+    // ホイールイベント（ズーム）の制御
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const handleWheel = (e: WheelEvent) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          // ズーム処理: 上スクロールで拡大、下スクロールで縮小
+          // deltaYは通常100単位なので、適当な係数を掛けて調整
+          const delta = -e.deltaY * 0.5;
+          onZoom(delta);
+        }
+      };
+
+      container.addEventListener("wheel", handleWheel, { passive: false });
+
+      return () => {
+        container.removeEventListener("wheel", handleWheel);
+      };
+    }, [onZoom]);
 
     // WaveSurfer初期化
     useEffect(() => {
