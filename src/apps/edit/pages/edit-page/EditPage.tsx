@@ -14,6 +14,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { mockLabels } from "../../constants/mockLabels";
 import type { CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
+import type { LabelEditorRef } from "./components/LabelEditor";
+import { LabelEditor } from "./components/LabelEditor";
 import { SettingsDialog } from "./components/SettingsDialog";
 import type { WaveformEditorRef } from "./components/WaveformEditor";
 import { WaveformEditor } from "./components/WaveformEditor";
@@ -21,7 +23,9 @@ import { WaveformEditor } from "./components/WaveformEditor";
 const EditPage: React.FC = () => {
   // Refs
   const waveformEditorRef = useRef<WaveformEditorRef>(null);
+  const labelEditorRef = useRef<LabelEditorRef>(null);
   const labelManagerRef = useRef(new LabelManager(mockLabels));
+  const currentAudioUrlRef = useRef<string | null>(null);
 
   // State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,8 +42,30 @@ const EditPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (file && waveformEditorRef.current) {
       const url = URL.createObjectURL(file);
+      currentAudioUrlRef.current = url;
       waveformEditorRef.current.load(url);
     }
+  };
+
+  // WaveformEditorからのイベントハンドラー
+  const handleWaveformReady = () => {
+    setIsReady(true);
+    if (
+      waveformEditorRef.current &&
+      labelEditorRef.current &&
+      currentAudioUrlRef.current
+    ) {
+      const duration = waveformEditorRef.current.getDuration();
+      labelEditorRef.current.load(currentAudioUrlRef.current, duration);
+    }
+  };
+
+  const handleWaveformScroll = (scrollLeft: number) => {
+    labelEditorRef.current?.syncScroll(scrollLeft);
+  };
+
+  const handleWaveformTimeUpdate = (time: number) => {
+    labelEditorRef.current?.syncCursor(time);
   };
 
   // キーボードショートカットとマウスイベントの制御
@@ -129,12 +155,22 @@ const EditPage: React.FC = () => {
           zoomLevel={zoomLevel}
           stopBehavior={stopBehavior}
           cursorBehavior={cursorBehavior}
-          labelManager={labelManagerRef.current}
-          onReady={() => setIsReady(true)}
+          onReady={handleWaveformReady}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onFinish={() => setIsPlaying(false)}
+          onScroll={handleWaveformScroll}
+          onTimeUpdate={handleWaveformTimeUpdate}
         />
+
+        <Box sx={{ mt: 1 }}>
+          <LabelEditor
+            ref={labelEditorRef}
+            zoomLevel={zoomLevel}
+            cursorBehavior={cursorBehavior}
+            labelManager={labelManagerRef.current}
+          />
+        </Box>
       </Paper>
 
       <SettingsDialog
