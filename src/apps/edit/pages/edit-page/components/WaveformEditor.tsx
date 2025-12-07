@@ -144,17 +144,23 @@ export const WaveformEditor = forwardRef<
 
       ws.on("audioprocess", (time) => {
         onTimeUpdate(time);
+        // 再生中もスクロール位置を同期する
+        onScroll(ws.getScroll());
       });
 
-      ws.on("scroll", (start, end) => {
+      ws.on("interaction", (time) => {
+        onTimeUpdate(time);
+      });
+
+      ws.on("seeking", (time) => {
+        onTimeUpdate(time);
+      });
+
+      ws.on("scroll", () => {
         // wavesurferのscrollイベントはstart/endの秒数を返す
-        // 実際のスクロール位置を取得するにはDOMを見る必要がある
-        const wrapper = containerRef.current?.querySelector(
-          ".wrapper"
-        ) as HTMLElement;
-        if (wrapper) {
-          onScroll(wrapper.scrollLeft);
-        }
+        // 実際のスクロール位置を取得するにはAPIを使用する
+        const scrollLeft = ws.getScroll();
+        onScroll(scrollLeft);
       });
 
       return () => {

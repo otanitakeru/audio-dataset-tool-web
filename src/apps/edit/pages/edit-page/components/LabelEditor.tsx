@@ -36,13 +36,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
     useImperativeHandle(ref, () => ({
       syncScroll: (scrollLeft: number) => {
         if (wavesurferRef.current) {
-          // WaveSurferの内部スクロール要素にアクセスして同期
-          const wrapper = containerRef.current?.querySelector(
-            ".wrapper"
-          ) as HTMLElement;
-          if (wrapper) {
-            wrapper.scrollLeft = scrollLeft;
-          }
+          wavesurferRef.current.setScroll(scrollLeft);
         }
       },
       syncZoom: (pxPerSec: number) => {
@@ -84,8 +78,8 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
         barWidth: 0,
         height: trackHeight,
         minPxPerSec: zoomLevel,
-        autoScroll: true,
-        autoCenter: cursorBehavior === "fixed_center",
+        autoScroll: false, // スクロールはWaveformEditorと同期するため無効化
+        autoCenter: false, // センターリングもWaveformEditorと同期するため無効化
         interact: false, // 波形クリックでの移動を無効化（同期のため）
         plugins: [regions],
         hideScrollbar: true, // スクロールバーはメインに従うので隠す
@@ -130,11 +124,10 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
       if (wavesurferRef.current) {
         wavesurferRef.current.setOptions({
           minPxPerSec: zoomLevel,
-          autoCenter: cursorBehavior === "fixed_center",
           height: trackHeight,
         });
       }
-    }, [zoomLevel, cursorBehavior, trackHeight]);
+    }, [zoomLevel, trackHeight]);
 
     // リサイズハンドラー
     const handleResize = useCallback(
