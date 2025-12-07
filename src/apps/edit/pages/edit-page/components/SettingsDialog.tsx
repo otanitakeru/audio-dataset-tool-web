@@ -13,7 +13,7 @@ import {
   Switch,
 } from "@mui/material";
 import React from "react";
-import type { CursorBehavior, StopBehavior } from "../types";
+import type { CursorBehavior, StopBehavior } from "../../../types";
 
 interface SettingsDialogProps {
   open: boolean;
