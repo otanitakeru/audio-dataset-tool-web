@@ -26,7 +26,7 @@ interface LabelEditorProps {
 }
 
 export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
-  ({ zoomLevel, cursorBehavior, labelManager }, ref) => {
+  ({ zoomLevel, labelManager }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const regionsPluginRef = useRef<RegionsPlugin | null>(null);
