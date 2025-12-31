@@ -60,7 +60,7 @@ const EditPage: React.FC = () => {
       currentAudioUrlRef.current
     ) {
       // LabelEditorにも同じオーディオを読み込む
-      // WaveformEditorの準備が完了していないとdurationが取得できない可能性があるのでここで読み込む
+      // ※ WaveformEditorの準備が完了していないとdurationが取得できない可能性があるのでここで読み込む
       const duration = waveformEditorRef.current.getDuration();
       labelEditorRef.current.load(currentAudioUrlRef.current, duration);
     }
@@ -76,10 +76,17 @@ const EditPage: React.FC = () => {
     labelEditorRef.current?.syncCursor(time);
   };
 
+  // WaveformEditorのズームレベルが変わったときにzoomLevelを更新する
+  // Propsで渡すかsync関数を使うべきかについて：
+  //   zoomLevel: 頻度が低く、構造的な変更を伴うため State/Props (宣言的) が適しています。
+  //   scroll, cursor: 頻度が極めて高く、滑らかさが求められるため Ref/Method (命令的) が適しています。
   const handleWaveformZoom = (delta: number) => {
     setZoomLevel((prev) => {
-      const newZoom = Math.max(10, Math.min(1000, prev + delta));
-      return newZoom;
+      // 対数ズーム: deltaに応じて指数関数的に変化させる
+      // sensitivityは感度調整用（0.002 ~ 0.005程度が目安）
+      const sensitivity = 0.01;
+      const newZoom = prev * Math.exp(delta * sensitivity);
+      return Math.max(10, Math.min(1000, newZoom));
     });
   };
 
