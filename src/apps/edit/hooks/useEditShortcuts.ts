@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ZOOM_SETTINGS } from "../constants/settings";
 import type { WaveformEditorRef } from "../pages/edit-page/components/WaveformEditor";
 import type { ActiveDialog } from "../types";
 
@@ -37,12 +38,24 @@ export const useEditShortcuts = ({
 
       // g: 縮小, h: 拡大
       if (e.key === "g") {
-        const newZoom = Math.max(10, zoomLevel - 10);
-        setZoomLevel(newZoom);
+        setZoomLevel((prev) => {
+          const delta = -ZOOM_SETTINGS.KEYBOARD_DELTA;
+          const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
+          return Math.max(
+            ZOOM_SETTINGS.MIN,
+            Math.min(ZOOM_SETTINGS.MAX, newZoom)
+          );
+        });
       }
       if (e.key === "h") {
-        const newZoom = Math.min(1000, zoomLevel + 10);
-        setZoomLevel(newZoom);
+        setZoomLevel((prev) => {
+          const delta = ZOOM_SETTINGS.KEYBOARD_DELTA;
+          const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
+          return Math.max(
+            ZOOM_SETTINGS.MIN,
+            Math.min(ZOOM_SETTINGS.MAX, newZoom)
+          );
+        });
       }
     };
 

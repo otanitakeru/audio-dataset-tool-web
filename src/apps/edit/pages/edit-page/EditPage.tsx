@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { mockLabels } from "../../constants/mockLabels";
+import { ZOOM_SETTINGS } from "../../constants/settings";
 import { useEditShortcuts } from "../../hooks/useEditShortcuts";
 import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
@@ -84,10 +85,8 @@ const EditPage: React.FC = () => {
   const handleWaveformZoom = (delta: number) => {
     setZoomLevel((prev) => {
       // 対数ズーム: deltaに応じて指数関数的に変化させる
-      // sensitivityは感度調整用（0.002 ~ 0.005程度が目安）
-      const sensitivity = 0.01;
-      const newZoom = prev * Math.exp(delta * sensitivity);
-      return Math.max(10, Math.min(1000, newZoom));
+      const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
+      return Math.max(ZOOM_SETTINGS.MIN, Math.min(ZOOM_SETTINGS.MAX, newZoom));
     });
   };
 
