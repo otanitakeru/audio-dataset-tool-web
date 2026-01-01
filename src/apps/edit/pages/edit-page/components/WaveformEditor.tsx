@@ -139,12 +139,13 @@ export const WaveformEditor = forwardRef<
         normalize: true,
         plugins: [
           Minimap.create({
-            height: 50,
-            waveColor: "#ddd",
-            progressColor: "#999",
+            height: 60,
+            waveColor: "#90caf9", // 薄い青（未再生部分）
+            progressColor: "#1976d2", // 濃い青（再生済み部分）
             container: minimapRef.current,
-            cursorWidth: 0,
-            overlayColor: "rgba(0, 0, 0, 0.1)",
+            cursorWidth: 1,
+            cursorColor: "#ff5722",
+            overlayColor: "rgba(0, 0, 0, 0.15)", // 表示範囲を少し暗く強調
           }),
           Timeline.create({
             height: 20,
@@ -235,9 +236,14 @@ export const WaveformEditor = forwardRef<
           ref={minimapRef}
           sx={{
             width: "100%",
-            mb: 1,
-            border: "1px solid #e0e0e0",
+            mb: 2,
+            borderRadius: 1,
+            overflow: "hidden",
             bgcolor: "#f5f5f5",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            "& ::part(minimap)": {
+              // Shadow DOM内のスタイルが必要な場合（WaveSurferのバージョンによる）
+            },
           }}
         />
 
