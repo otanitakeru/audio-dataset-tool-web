@@ -1,7 +1,7 @@
-import { Label } from "../utils/LabelManager";
+import type { Label } from "../types";
 
 export const mockLabels: Label[] = [
-  new Label("1", 2.5, 5.0, "intro_speech.wav"),
-  new Label("2", 8.0, 12.5, "main_content.wav"),
-  new Label("3", 15.0, 18.2, "outro.wav"),
+  { id: "1", start: 2.5, end: 5.0, name: "intro_speech.wav" },
+  { id: "2", start: 8.0, end: 12.5, name: "main_content.wav" },
+  { id: "3", start: 15.0, end: 18.2, name: "outro.wav" },
 ];

@@ -1,18 +1,6 @@
+import type { Label } from "../types";
+
 // ラベルを管理するクラス
-export class Label {
-  id: string; // ラベルの一意識別子
-  start: number; // ラベルの開始時間（秒）
-  end: number; // ラベルの終了時間（秒）
-  name: string; // ラベルの名前（ファイル名になる）
-
-  constructor(id: string, start: number, end: number, name: string) {
-    this.id = id;
-    this.start = start;
-    this.end = end;
-    this.name = name;
-  }
-}
-
 export class LabelManager {
   private labels: Label[];
 

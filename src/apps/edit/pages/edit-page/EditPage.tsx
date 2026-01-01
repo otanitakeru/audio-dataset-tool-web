@@ -10,8 +10,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { mockLabels } from "../../constants/mockLabels";
+import { useEditShortcuts } from "../../hooks/useEditShortcuts";
 import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
 import type { LabelEditorRef } from "./components/LabelEditor";
@@ -91,40 +92,12 @@ const EditPage: React.FC = () => {
   };
 
   // キーボードショートカットとマウスイベントの制御
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // もし設定画面などを開いていたら、音声編集を行うためのショートカットは無効化
-      if (activeDialog) return;
-
-      // 音声波形エディタの準備が完了していなかったらショートカットは無効化
-      const editor = waveformEditorRef.current;
-      if (!editor) return;
-
-      // スペースキー: 再生/停止
-      if (e.code === "Space") {
-        e.preventDefault(); // スクロール防止
-        // 再生/停止切り替え
-        if (editor.isPlaying()) {
-          editor.pause();
-        } else {
-          editor.play();
-        }
-      }
-
-      // g: 縮小, h: 拡大
-      if (e.key === "g") {
-        const newZoom = Math.max(10, zoomLevel - 10);
-        setZoomLevel(newZoom);
-      }
-      if (e.key === "h") {
-        const newZoom = Math.min(1000, zoomLevel + 10);
-        setZoomLevel(newZoom);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomLevel, activeDialog]);
+  useEditShortcuts({
+    activeDialog,
+    waveformEditorRef,
+    zoomLevel,
+    setZoomLevel,
+  });
 
   return (
     <Box sx={{ p: 4, maxWidth: "1200px", margin: "0 auto" }}>
