@@ -140,12 +140,12 @@ export const WaveformEditor = forwardRef<
         plugins: [
           Minimap.create({
             height: 60,
-            waveColor: "#90caf9", // 薄い青（未再生部分）
-            progressColor: "#1976d2", // 濃い青（再生済み部分）
+            waveColor: "#ddd", // 未再生部分
+            progressColor: "#999", // 再生済み部分）
             container: minimapRef.current,
             cursorWidth: 1,
             cursorColor: "#ff5722",
-            overlayColor: "rgba(0, 0, 0, 0.15)", // 表示範囲を少し暗く強調
+            overlayColor: "rgba(0, 0, 0, 0.25)", // 表示範囲を少し暗く強調
           }),
           Timeline.create({
             height: 20,
