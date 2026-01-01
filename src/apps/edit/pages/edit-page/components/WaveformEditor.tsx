@@ -10,6 +10,7 @@ import React, {
 import WaveSurfer from "wavesurfer.js";
 import Minimap from "wavesurfer.js/dist/plugins/minimap.esm.js";
 import Timeline from "wavesurfer.js/dist/plugins/timeline.esm.js";
+import { ZOOM_SETTINGS } from "../../../constants/settings";
 import type { CursorBehavior, StopBehavior } from "../../../types";
 
 export interface WaveformEditorRef {
@@ -108,7 +109,7 @@ export const WaveformEditor = forwardRef<
           e.preventDefault();
           // ズーム処理: 上スクロールで拡大、下スクロールで縮小
           // deltaYは通常100単位なので、適当な係数を掛けて調整
-          const delta = -e.deltaY * 0.5;
+          const delta = -e.deltaY * ZOOM_SETTINGS.WHEEL_COEFFICIENT;
           onZoom(delta);
         }
       };
