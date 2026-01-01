@@ -141,7 +141,7 @@ export const WaveformEditor = forwardRef<
           Minimap.create({
             height: 60,
             waveColor: "#ddd", // 未再生部分
-            progressColor: "#999", // 再生済み部分）
+            progressColor: "#999", // 再生済み部分
             container: minimapRef.current,
             cursorWidth: 1,
             cursorColor: "#ff5722",

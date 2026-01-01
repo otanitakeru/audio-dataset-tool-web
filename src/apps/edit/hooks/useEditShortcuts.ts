@@ -37,19 +37,10 @@ export const useEditShortcuts = ({
       }
 
       // g: 縮小, h: 拡大
-      if (e.key === "g") {
+      if (e.key === "g" || e.key === "h") {
+        const direction = e.key === "h" ? 1 : -1;
         setZoomLevel((prev) => {
-          const delta = -ZOOM_SETTINGS.KEYBOARD_DELTA;
-          const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
-          return Math.max(
-            ZOOM_SETTINGS.MIN,
-            Math.min(ZOOM_SETTINGS.MAX, newZoom)
-          );
-        });
-      }
-      if (e.key === "h") {
-        setZoomLevel((prev) => {
-          const delta = ZOOM_SETTINGS.KEYBOARD_DELTA;
+          const delta = direction * ZOOM_SETTINGS.KEYBOARD_DELTA;
           const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
           return Math.max(
             ZOOM_SETTINGS.MIN,
