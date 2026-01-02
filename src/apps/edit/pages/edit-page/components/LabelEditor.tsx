@@ -18,16 +18,19 @@ export interface LabelEditorRef {
   syncCursor: (time: number) => void;
   load: (url: string, duration: number) => void;
   addLabel: (start: number, end: number, name: string) => void;
+  updateLabel: (id: string, name: string) => void;
+  removeLabel: (id: string) => void;
 }
 
 interface LabelEditorProps {
   zoomLevel: number;
   cursorBehavior: CursorBehavior;
   labelManager: LabelManager;
+  onLabelEdit: (id: string, currentName: string) => void;
 }
 
 export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
-  ({ zoomLevel, labelManager }, ref) => {
+  ({ zoomLevel, labelManager, onLabelEdit }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const regionsPluginRef = useRef<RegionsPlugin | null>(null);
@@ -76,6 +79,25 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           drag: true,
           resize: true,
         });
+      },
+      updateLabel: (id: string, name: string) => {
+        labelManager.updateLabel(id, { name });
+        // リージョンのcontentも更新
+        const region = regionsPluginRef.current
+          ?.getRegions()
+          .find((r) => r.id === id);
+        if (region) {
+          region.setOptions({ content: name });
+        }
+      },
+      removeLabel: (id: string) => {
+        labelManager.removeLabel(id);
+        const region = regionsPluginRef.current
+          ?.getRegions()
+          .find((r) => r.id === id);
+        if (region) {
+          region.remove();
+        }
       },
     }));
 
@@ -127,6 +149,16 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           start: region.start,
           end: region.end,
         });
+      });
+
+      regions.on("region-double-clicked", (region) => {
+        // ダブルクリックで編集
+        // region.content は HTMLElement または string なので、string として扱う
+        const content =
+          typeof region.content === "string"
+            ? region.content
+            : region.content?.textContent || "";
+        onLabelEdit(region.id, content);
       });
 
       return () => {

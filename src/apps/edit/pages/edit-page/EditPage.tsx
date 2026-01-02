@@ -16,6 +16,7 @@ import { ZOOM_SETTINGS } from "../../constants/settings";
 import { useEditShortcuts } from "../../hooks/useEditShortcuts";
 import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
+import { LabelEditDialog } from "./components/LabelEditDialog";
 import type { LabelEditorRef } from "./components/LabelEditor";
 import { LabelEditor } from "./components/LabelEditor";
 import { LabelInputDialog } from "./components/LabelInputDialog";
@@ -42,6 +43,10 @@ const EditPage: React.FC = () => {
   const [pendingLabelRegion, setPendingLabelRegion] = useState<{
     start: number;
     end: number;
+  } | null>(null);
+  const [editingLabel, setEditingLabel] = useState<{
+    id: string;
+    name: string;
   } | null>(null);
 
   // ファイル読み込みハンドラー
@@ -119,6 +124,28 @@ const EditPage: React.FC = () => {
       waveformEditorRef.current?.clearRegions();
     }
     setPendingLabelRegion(null);
+  };
+
+  // ラベル編集開始（LabelEditorから呼ばれる）
+  const handleLabelEdit = (id: string, currentName: string) => {
+    setEditingLabel({ id, name: currentName });
+    setActiveDialog("label_edit");
+  };
+
+  // ラベル更新確定
+  const handleLabelUpdateConfirm = (name: string) => {
+    if (editingLabel && labelEditorRef.current) {
+      labelEditorRef.current.updateLabel(editingLabel.id, name);
+    }
+    setEditingLabel(null);
+  };
+
+  // ラベル削除
+  const handleLabelDelete = () => {
+    if (editingLabel && labelEditorRef.current) {
+      labelEditorRef.current.removeLabel(editingLabel.id);
+    }
+    setEditingLabel(null);
   };
 
   // キーボードショートカットとマウスイベントの制御
@@ -199,6 +226,7 @@ const EditPage: React.FC = () => {
             zoomLevel={zoomLevel}
             cursorBehavior={cursorBehavior}
             labelManager={labelManagerRef.current}
+            onLabelEdit={handleLabelEdit}
           />
         </Box>
       </Paper>
@@ -219,6 +247,17 @@ const EditPage: React.FC = () => {
           setPendingLabelRegion(null);
         }}
         onConfirm={handleLabelAddConfirm}
+      />
+
+      <LabelEditDialog
+        open={activeDialog === "label_edit"}
+        onClose={() => {
+          setActiveDialog(null);
+          setEditingLabel(null);
+        }}
+        onConfirm={handleLabelUpdateConfirm}
+        onDelete={handleLabelDelete}
+        initialValue={editingLabel?.name || ""}
       />
     </Box>
   );
