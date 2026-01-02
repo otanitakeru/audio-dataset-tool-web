@@ -18,6 +18,7 @@ import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
 import type { LabelEditorRef } from "./components/LabelEditor";
 import { LabelEditor } from "./components/LabelEditor";
+import { LabelInputDialog } from "./components/LabelInputDialog";
 import { SettingsDialog } from "./components/SettingsDialog";
 import type { WaveformEditorRef } from "./components/WaveformEditor";
 import { WaveformEditor } from "./components/WaveformEditor";
@@ -38,6 +39,10 @@ const EditPage: React.FC = () => {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [cursorBehavior, setCursorBehavior] =
     useState<CursorBehavior>("fixed_center");
+  const [pendingLabelRegion, setPendingLabelRegion] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
 
   // ファイル読み込みハンドラー
   // オーディオファイルが選択されたときに実行される。
@@ -90,12 +95,39 @@ const EditPage: React.FC = () => {
     });
   };
 
+  // ラベル追加フロー開始（ショートカットから呼ばれる）
+  const handleLabelAddStart = () => {
+    const region = waveformEditorRef.current?.getSelectedRegion();
+    if (region) {
+      setPendingLabelRegion(region);
+      setActiveDialog("label_input");
+    } else {
+      // 選択範囲がない場合は何もしない、あるいは通知を出すなど
+      console.log("No region selected");
+    }
+  };
+
+  // ラベル追加確定（ダイアログから呼ばれる）
+  const handleLabelAddConfirm = (name: string) => {
+    if (pendingLabelRegion && labelEditorRef.current) {
+      labelEditorRef.current.addLabel(
+        pendingLabelRegion.start,
+        pendingLabelRegion.end,
+        name
+      );
+      // 選択範囲をクリア
+      waveformEditorRef.current?.clearRegions();
+    }
+    setPendingLabelRegion(null);
+  };
+
   // キーボードショートカットとマウスイベントの制御
   useEditShortcuts({
     activeDialog,
     waveformEditorRef,
     zoomLevel,
     setZoomLevel,
+    onLabelAddStart: handleLabelAddStart,
   });
 
   return (
@@ -178,6 +210,15 @@ const EditPage: React.FC = () => {
         setStopBehavior={setStopBehavior}
         cursorBehavior={cursorBehavior}
         setCursorBehavior={setCursorBehavior}
+      />
+
+      <LabelInputDialog
+        open={activeDialog === "label_input"}
+        onClose={() => {
+          setActiveDialog(null);
+          setPendingLabelRegion(null);
+        }}
+        onConfirm={handleLabelAddConfirm}
       />
     </Box>
   );

@@ -17,6 +17,7 @@ export interface LabelEditorRef {
   syncZoom: (pxPerSec: number) => void;
   syncCursor: (time: number) => void;
   load: (url: string, duration: number) => void;
+  addLabel: (start: number, end: number, name: string) => void;
 }
 
 interface LabelEditorProps {
@@ -60,6 +61,21 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           // peaksは Array<Float32Array | number[]> 型なので、[[0]] (ステレオチャンネルの配列の配列) として渡す必要がある
           ws.load(url, [[0]], duration);
         }
+      },
+      addLabel: (start: number, end: number, name: string) => {
+        const id = Math.random().toString(36).substring(7);
+        const newLabel = { id, start, end, name };
+        labelManager.addLabel(newLabel);
+
+        regionsPluginRef.current?.addRegion({
+          id: newLabel.id,
+          start: newLabel.start,
+          end: newLabel.end,
+          content: newLabel.name,
+          color: "rgba(0, 123, 255, 0.1)",
+          drag: true,
+          resize: true,
+        });
       },
     }));
 
