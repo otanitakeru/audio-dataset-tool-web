@@ -70,7 +70,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
         const newLabel = { id, start, end, name };
         labelManager.addLabel(newLabel);
 
-        regionsPluginRef.current?.addRegion({
+        const region = regionsPluginRef.current?.addRegion({
           id: newLabel.id,
           start: newLabel.start,
           end: newLabel.end,
@@ -79,6 +79,19 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           drag: true,
           resize: true,
         });
+
+        // 新規追加時もイベントリスナーを追加
+        if (region) {
+          const element = region.element;
+          if (element) {
+            element.addEventListener("mouseenter", () => {
+              region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
+            });
+            element.addEventListener("mouseleave", () => {
+              region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
+            });
+          }
+        }
       },
       updateLabel: (id: string, name: string) => {
         labelManager.updateLabel(id, { name });
@@ -128,11 +141,29 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
 
       wavesurferRef.current = ws;
 
+      regions.on("region-created", (region) => {
+        // ホバー効果のためにクラスを追加するなどの処理が必要な場合があるが、
+        // WaveSurferのRegionsPluginはShadow DOMを使っていないため、
+        // GlobalStylesで定義したCSSが適用されるはず。
+        // ただし、region.elementに対して直接スタイル操作が行われるとCSSが負ける可能性がある。
+        // 念のため、マウスイベントを手動で追加して色を制御する。
+
+        const element = region.element;
+        if (element) {
+          element.addEventListener("mouseenter", () => {
+            region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
+          });
+          element.addEventListener("mouseleave", () => {
+            region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
+          });
+        }
+      });
+
       // リージョン初期化・更新イベント
       ws.on("decode", () => {
         regions.clearRegions();
         labelManager.getLabels().forEach((label) => {
-          regions.addRegion({
+          const region = regions.addRegion({
             id: label.id,
             start: label.start,
             end: label.end,
@@ -141,6 +172,17 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
             drag: true,
             resize: true,
           });
+
+          // 既存のリージョンにもイベントリスナーを追加
+          const element = region.element;
+          if (element) {
+            element.addEventListener("mouseenter", () => {
+              region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
+            });
+            element.addEventListener("mouseleave", () => {
+              region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
+            });
+          }
         });
       });
 
@@ -151,8 +193,11 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
         });
       });
 
-      regions.on("region-double-clicked", (region) => {
-        // ダブルクリックで編集
+      regions.on("region-clicked", (region, e) => {
+        // クリックイベントの伝播を止める（WaveSurfer本体のシークを防ぐため）
+        e.stopPropagation();
+
+        // クリックで編集
         // region.content は HTMLElement または string なので、string として扱う
         const content =
           typeof region.content === "string"
@@ -212,9 +257,14 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           styles={{
             ".wavesurfer-region": {
               // ラベルトラック内でのスタイル
-              backgroundColor: "rgba(0, 0, 0, 0.05) !important",
+              backgroundColor: "rgba(0, 123, 255, 0.1) !important",
               borderBottom: "1px solid #ccc",
               zIndex: 10,
+              cursor: "pointer !important",
+              transition: "background-color 0.2s ease",
+            },
+            ".wavesurfer-region:hover": {
+              backgroundColor: "rgba(0, 123, 255, 0.3) !important",
             },
             ".wavesurfer-region-handle-left": {
               cursor: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="8" y="22" font-size="24" font-family="monospace" fill="black">[</text></svg>') 10 16, w-resize !important`,
