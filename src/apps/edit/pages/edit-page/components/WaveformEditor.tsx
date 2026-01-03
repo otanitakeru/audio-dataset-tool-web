@@ -10,6 +10,7 @@ import React, {
 import WaveSurfer from "wavesurfer.js";
 import Minimap from "wavesurfer.js/dist/plugins/minimap.esm.js";
 import Timeline from "wavesurfer.js/dist/plugins/timeline.esm.js";
+import { ZOOM_SETTINGS } from "../../../constants/settings";
 import type { CursorBehavior, StopBehavior } from "../../../types";
 
 export interface WaveformEditorRef {
@@ -108,7 +109,7 @@ export const WaveformEditor = forwardRef<
           e.preventDefault();
           // ズーム処理: 上スクロールで拡大、下スクロールで縮小
           // deltaYは通常100単位なので、適当な係数を掛けて調整
-          const delta = -e.deltaY * 0.5;
+          const delta = -e.deltaY * ZOOM_SETTINGS.WHEEL_COEFFICIENT;
           onZoom(delta);
         }
       };
@@ -138,12 +139,13 @@ export const WaveformEditor = forwardRef<
         normalize: true,
         plugins: [
           Minimap.create({
-            height: 50,
-            waveColor: "#ddd",
-            progressColor: "#999",
+            height: 60,
+            waveColor: "#ddd", // 未再生部分
+            progressColor: "#999", // 再生済み部分
             container: minimapRef.current,
-            cursorWidth: 0,
-            overlayColor: "rgba(0, 0, 0, 0.1)",
+            cursorWidth: 1,
+            cursorColor: "#ff5722",
+            overlayColor: "rgba(0, 0, 0, 0.25)", // 表示範囲を少し暗く強調
           }),
           Timeline.create({
             height: 20,
@@ -234,9 +236,14 @@ export const WaveformEditor = forwardRef<
           ref={minimapRef}
           sx={{
             width: "100%",
-            mb: 1,
-            border: "1px solid #e0e0e0",
+            mb: 2,
+            borderRadius: 1,
+            overflow: "hidden",
             bgcolor: "#f5f5f5",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+            "& ::part(minimap)": {
+              // Shadow DOM内のスタイルが必要な場合（WaveSurferのバージョンによる）
+            },
           }}
         />
 

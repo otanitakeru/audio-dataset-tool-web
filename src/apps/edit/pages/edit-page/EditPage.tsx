@@ -10,8 +10,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { mockLabels } from "../../constants/mockLabels";
+import { ZOOM_SETTINGS } from "../../constants/settings";
+import { useEditShortcuts } from "../../hooks/useEditShortcuts";
 import type { ActiveDialog, CursorBehavior, StopBehavior } from "../../types";
 import { LabelManager } from "../../utils/LabelManager";
 import type { LabelEditorRef } from "./components/LabelEditor";
@@ -60,7 +62,7 @@ const EditPage: React.FC = () => {
       currentAudioUrlRef.current
     ) {
       // LabelEditorにも同じオーディオを読み込む
-      // WaveformEditorの準備が完了していないとdurationが取得できない可能性があるのでここで読み込む
+      // ※ WaveformEditorの準備が完了していないとdurationが取得できない可能性があるのでここで読み込む
       const duration = waveformEditorRef.current.getDuration();
       labelEditorRef.current.load(currentAudioUrlRef.current, duration);
     }
@@ -76,48 +78,25 @@ const EditPage: React.FC = () => {
     labelEditorRef.current?.syncCursor(time);
   };
 
+  // WaveformEditorのズームレベルが変わったときにzoomLevelを更新する
+  // Propsで渡すかsync関数を使うべきかについて：
+  //   zoomLevel: 頻度が低く、構造的な変更を伴うため State/Props (宣言的) が適しています。
+  //   scroll, cursor: 頻度が極めて高く、滑らかさが求められるため Ref/Method (命令的) が適しています。
   const handleWaveformZoom = (delta: number) => {
     setZoomLevel((prev) => {
-      const newZoom = Math.max(10, Math.min(1000, prev + delta));
-      return newZoom;
+      // 対数ズーム: deltaに応じて指数関数的に変化させる
+      const newZoom = prev * Math.exp(delta * ZOOM_SETTINGS.SENSITIVITY);
+      return Math.max(ZOOM_SETTINGS.MIN, Math.min(ZOOM_SETTINGS.MAX, newZoom));
     });
   };
 
   // キーボードショートカットとマウスイベントの制御
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // もし設定画面などを開いていたら、音声編集を行うためのショートカットは無効化
-      if (activeDialog) return;
-
-      // 音声波形エディタの準備が完了していなかったらショートカットは無効化
-      const editor = waveformEditorRef.current;
-      if (!editor) return;
-
-      // スペースキー: 再生/停止
-      if (e.code === "Space") {
-        e.preventDefault(); // スクロール防止
-        // 再生/停止切り替え
-        if (editor.isPlaying()) {
-          editor.pause();
-        } else {
-          editor.play();
-        }
-      }
-
-      // g: 縮小, h: 拡大
-      if (e.key === "g") {
-        const newZoom = Math.max(10, zoomLevel - 10);
-        setZoomLevel(newZoom);
-      }
-      if (e.key === "h") {
-        const newZoom = Math.min(1000, zoomLevel + 10);
-        setZoomLevel(newZoom);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomLevel, activeDialog]);
+  useEditShortcuts({
+    activeDialog,
+    waveformEditorRef,
+    zoomLevel,
+    setZoomLevel,
+  });
 
   return (
     <Box sx={{ p: 4, maxWidth: "1200px", margin: "0 auto" }}>
