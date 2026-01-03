@@ -203,7 +203,8 @@ const EditPage: React.FC = () => {
 
         <Typography variant="caption" display="block" gutterBottom>
           操作: [Space] 再生/停止 | [G] 縮小 | [H] 拡大 | [Ctrl+Wheel] 拡大縮小
-          | [Shift+Wheel] 横スクロール | [Click] カーソル移動
+          | [Shift+Wheel] 横スクロール | [Click] カーソル移動 | [Ctrl+B]
+          ラベル追加
         </Typography>
 
         <WaveformEditor
