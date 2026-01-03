@@ -101,7 +101,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
         const newLabel = { id, start, end, name };
         labelManager.addLabel(newLabel);
 
-        const region = regionsPluginRef.current?.addRegion({
+        regionsPluginRef.current?.addRegion({
           id: newLabel.id,
           start: newLabel.start,
           end: newLabel.end,
