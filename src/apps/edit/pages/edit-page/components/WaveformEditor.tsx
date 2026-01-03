@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import WaveSurfer from "wavesurfer.js";
 import Minimap from "wavesurfer.js/dist/plugins/minimap.esm.js";
+import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.esm.js";
 import Timeline from "wavesurfer.js/dist/plugins/timeline.esm.js";
 import { ZOOM_SETTINGS } from "../../../constants/settings";
 import type { CursorBehavior, StopBehavior } from "../../../types";
@@ -21,6 +22,8 @@ export interface WaveformEditorRef {
   getCurrentTime: () => number;
   getDuration: () => number;
   setScroll: (scrollLeft: number) => void;
+  getSelectedRegion: () => { start: number; end: number } | null;
+  clearRegions: () => void;
 }
 
 interface WaveformEditorProps {
@@ -58,6 +61,7 @@ export const WaveformEditor = forwardRef<
     const containerRef = useRef<HTMLDivElement>(null);
     const minimapRef = useRef<HTMLDivElement>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
+    const regionsPluginRef = useRef<RegionsPlugin | null>(null);
 
     const [waveformHeight, setWaveformHeight] = useState(200);
     const [playbackStartPosition, setPlaybackStartPosition] =
@@ -84,6 +88,18 @@ export const WaveformEditor = forwardRef<
             wrapper.scrollLeft = scrollLeft;
           }
         }
+      },
+      getSelectedRegion: () => {
+        const regions = regionsPluginRef.current?.getRegions();
+        if (regions && regions.length > 0) {
+          // 最後に作成されたリージョンを返す（通常は1つだけのはず）
+          const lastRegion = regions[regions.length - 1];
+          return { start: lastRegion.start, end: lastRegion.end };
+        }
+        return null;
+      },
+      clearRegions: () => {
+        regionsPluginRef.current?.clearRegions();
       },
     }));
 
@@ -125,6 +141,9 @@ export const WaveformEditor = forwardRef<
     useEffect(() => {
       if (!containerRef.current || !minimapRef.current) return;
 
+      const regions = RegionsPlugin.create();
+      regionsPluginRef.current = regions;
+
       const ws = WaveSurfer.create({
         container: containerRef.current,
         waveColor: "#4a90e2",
@@ -138,6 +157,7 @@ export const WaveformEditor = forwardRef<
         autoCenter: cursorBehavior === "fixed_center",
         normalize: true,
         plugins: [
+          regions,
           Minimap.create({
             height: 60,
             waveColor: "#ddd", // 未再生部分
@@ -151,6 +171,21 @@ export const WaveformEditor = forwardRef<
             height: 20,
           }),
         ],
+      });
+
+      // ドラッグ選択を有効化
+      regions.enableDragSelection({
+        color: "rgba(255, 0, 0, 0.1)",
+      });
+
+      // リージョン作成時に既存のリージョンを削除（常に1つだけ選択できるようにする）
+      regions.on("region-created", (region) => {
+        const allRegions = regions.getRegions();
+        allRegions.forEach((r) => {
+          if (r.id !== region.id) {
+            r.remove();
+          }
+        });
       });
 
       wavesurferRef.current = ws;
