@@ -262,7 +262,6 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
               borderBottom: "1px solid #ccc",
               zIndex: 10,
               cursor: "pointer !important",
-              transition: "background-color 0.2s ease",
             },
             ".wavesurfer-region-handle-left": {
               cursor: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="8" y="22" font-size="24" font-family="monospace" fill="black">[</text></svg>') 10 16, w-resize !important`,
