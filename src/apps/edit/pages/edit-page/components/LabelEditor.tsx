@@ -35,6 +35,37 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const regionsPluginRef = useRef<RegionsPlugin | null>(null);
     const [trackHeight, setTrackHeight] = useState(50);
+    const regionCleanups = useRef<Map<string, () => void>>(new Map());
+
+    const registerRegionEvents = useCallback((region: any) => {
+      if (regionCleanups.current.has(region.id)) return;
+
+      const element = region.element;
+      if (element) {
+        const onMouseEnter = () => {
+          region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
+        };
+        const onMouseLeave = () => {
+          region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
+        };
+
+        element.addEventListener("mouseenter", onMouseEnter);
+        element.addEventListener("mouseleave", onMouseLeave);
+
+        regionCleanups.current.set(region.id, () => {
+          element.removeEventListener("mouseenter", onMouseEnter);
+          element.removeEventListener("mouseleave", onMouseLeave);
+        });
+      }
+    }, []);
+
+    const unregisterRegionEvents = useCallback((regionId: string) => {
+      const cleanup = regionCleanups.current.get(regionId);
+      if (cleanup) {
+        cleanup();
+        regionCleanups.current.delete(regionId);
+      }
+    }, []);
 
     // 外部へのメソッド公開
     useImperativeHandle(ref, () => ({
@@ -79,19 +110,6 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           drag: true,
           resize: true,
         });
-
-        // 新規追加時もイベントリスナーを追加
-        if (region) {
-          const element = region.element;
-          if (element) {
-            element.addEventListener("mouseenter", () => {
-              region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
-            });
-            element.addEventListener("mouseleave", () => {
-              region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
-            });
-          }
-        }
       },
       updateLabel: (id: string, name: string) => {
         labelManager.updateLabel(id, { name });
@@ -141,26 +159,18 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
 
       wavesurferRef.current = ws;
 
-      regions.on("region-created", (region) => {
-        // ホバー効果のためにクラスを追加するなどの処理が必要な場合があるが、
-        // WaveSurferのRegionsPluginはShadow DOMを使っていないため、
-        // GlobalStylesで定義したCSSが適用されるはず。
-        // ただし、region.elementに対して直接スタイル操作が行われるとCSSが負ける可能性がある。
-        // 念のため、マウスイベントを手動で追加して色を制御する。
+      regions.on("region-created", registerRegionEvents);
 
-        const element = region.element;
-        if (element) {
-          element.addEventListener("mouseenter", () => {
-            region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
-          });
-          element.addEventListener("mouseleave", () => {
-            region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
-          });
-        }
+      regions.on("region-removed", (region) => {
+        unregisterRegionEvents(region.id);
       });
 
       // リージョン初期化・更新イベント
       ws.on("decode", () => {
+        // 既存のリスナーをクリーンアップ
+        regionCleanups.current.forEach((cleanup) => cleanup());
+        regionCleanups.current.clear();
+
         regions.clearRegions();
         labelManager.getLabels().forEach((label) => {
           const region = regions.addRegion({
@@ -172,17 +182,6 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
             drag: true,
             resize: true,
           });
-
-          // 既存のリージョンにもイベントリスナーを追加
-          const element = region.element;
-          if (element) {
-            element.addEventListener("mouseenter", () => {
-              region.setOptions({ color: "rgba(0, 123, 255, 0.3)" });
-            });
-            element.addEventListener("mouseleave", () => {
-              region.setOptions({ color: "rgba(0, 123, 255, 0.1)" });
-            });
-          }
         });
       });
 
@@ -208,6 +207,8 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
 
       return () => {
         ws.destroy();
+        regionCleanups.current.forEach((cleanup) => cleanup());
+        regionCleanups.current.clear();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
