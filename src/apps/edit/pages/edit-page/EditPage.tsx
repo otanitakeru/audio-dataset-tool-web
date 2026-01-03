@@ -107,8 +107,8 @@ const EditPage: React.FC = () => {
       setPendingLabelRegion(region);
       setActiveDialog("label_input");
     } else {
-      // 選択範囲がない場合は何もしない、あるいは通知を出すなど
-      console.log("No region selected");
+      // 選択範囲がない場合は通知を出す
+      alert("ラベルを追加する範囲を選択してください。");
     }
   };
 
