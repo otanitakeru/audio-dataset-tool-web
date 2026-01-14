@@ -1,6 +1,6 @@
 export type StopBehavior = "pause_at_current" | "return_to_start";
 export type CursorBehavior = "fixed_center" | "moving";
-export type ActiveDialog = "settings" | null;
+export type ActiveDialog = "settings" | "label_input" | "label_edit" | null;
 
 export interface Label {
   id: string; // ラベルの一意識別子

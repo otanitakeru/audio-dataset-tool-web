@@ -8,6 +8,7 @@ interface UseEditShortcutsProps {
   waveformEditorRef: React.RefObject<WaveformEditorRef | null>;
   zoomLevel: number;
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
+  onLabelAddStart: () => void;
 }
 
 export const useEditShortcuts = ({
@@ -15,6 +16,7 @@ export const useEditShortcuts = ({
   waveformEditorRef,
   zoomLevel,
   setZoomLevel,
+  onLabelAddStart,
 }: UseEditShortcutsProps) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,6 +26,13 @@ export const useEditShortcuts = ({
       // 音声波形エディタの準備が完了していなかったらショートカットは無効化
       const editor = waveformEditorRef.current;
       if (!editor) return;
+
+      // Ctrl+b: 選択範囲にラベルを追加
+      if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+        e.preventDefault();
+        onLabelAddStart();
+        return;
+      }
 
       // スペースキー: 再生/停止
       if (e.code === "Space") {
@@ -52,5 +61,11 @@ export const useEditShortcuts = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [zoomLevel, activeDialog, waveformEditorRef, setZoomLevel]);
+  }, [
+    zoomLevel,
+    activeDialog,
+    waveformEditorRef,
+    setZoomLevel,
+    onLabelAddStart,
+  ]);
 };
