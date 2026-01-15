@@ -82,3 +82,4 @@ npm run preview
 MIT License
 
 詳細は [LICENSE](LICENSE) ファイルを参照してください。
+
