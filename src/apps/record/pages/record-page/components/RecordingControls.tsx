@@ -1,3 +1,4 @@
+import EditIcon from "@mui/icons-material/Edit";
 import MicIcon from "@mui/icons-material/Mic";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
@@ -13,7 +14,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type RecordingState = "idle" | "recording";
 
-export const RecordingControls = () => {
+interface RecordingControlsProps {
+  /** 編集ボタンがクリックされた時のコールバック */
+  onEditClick?: () => void;
+  /** 録音が完了した時のコールバック */
+  onRecordingComplete?: (blob: Blob, mimeType: string) => void;
+}
+
+export const RecordingControls = ({
+  onEditClick,
+  onRecordingComplete,
+}: RecordingControlsProps) => {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [hasRecording, setHasRecording] = useState(false);
@@ -30,6 +41,7 @@ export const RecordingControls = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const isRecordingRef = useRef(false);
+  const latestBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -135,12 +147,18 @@ export const RecordingControls = () => {
       };
 
       mediaRecorder.onstop = () => {
+        const mimeType = mediaRecorder.mimeType || "audio/webm";
         const audioBlob = new Blob(audioChunksRef.current, {
-          type: mediaRecorder.mimeType || "audio/webm",
+          type: mimeType,
         });
         const url = URL.createObjectURL(audioBlob);
         audioUrlRef.current = url;
         setHasRecording(true);
+
+        // Blobを保存
+        latestBlobRef.current = { blob: audioBlob, mimeType };
+        // 親コンポーネントに通知
+        onRecordingComplete?.(audioBlob, mimeType);
 
         // Stop all tracks
         if (streamRef.current) {
@@ -175,7 +193,7 @@ export const RecordingControls = () => {
         "マイクへのアクセスが許可されていません。ブラウザの設定を確認してください。"
       );
     }
-  }, [updateAudioLevel]);
+  }, [updateAudioLevel, onRecordingComplete]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
@@ -234,6 +252,11 @@ export const RecordingControls = () => {
       playRecording();
     }
   }, [isPlaying, playRecording, stopPlayback]);
+
+  // Handle edit button click
+  const handleEditClick = useCallback(() => {
+    onEditClick?.();
+  }, [onEditClick]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -347,6 +370,28 @@ export const RecordingControls = () => {
           zIndex: 1100,
         }}
       >
+        {/* Edit button - only show when recording exists */}
+        {hasRecording && (
+          <Tooltip title="編集ページへ" placement="top">
+            <Fab
+              color="secondary"
+              size="medium"
+              onClick={handleEditClick}
+              disabled={recordingState === "recording" || isPlaying}
+              sx={{
+                width: 56,
+                height: 56,
+                boxShadow: 3,
+                "&:hover": {
+                  boxShadow: 5,
+                },
+              }}
+            >
+              <EditIcon sx={{ fontSize: 28 }} />
+            </Fab>
+          </Tooltip>
+        )}
+
         {/* Play button - only show when recording exists */}
         {hasRecording && (
           <Tooltip title={isPlaying ? "停止" : "再生"} placement="top">

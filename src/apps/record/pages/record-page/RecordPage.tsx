@@ -1,6 +1,8 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Box, Button, Container, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAudioBlob } from "../../../../shared/contexts/AudioBlobContext";
 import type { TextSegmentLine } from "../../types/textSegment";
 import { Card } from "./components/Card";
 import { FileUploader } from "./components/FileUploader";
@@ -10,6 +12,9 @@ import { RecordingControls } from "./components/RecordingControls";
 import { TextDisplay } from "./components/TextDisplay";
 
 const RecordPage = () => {
+  const navigate = useNavigate();
+  const { setAudioBlob } = useAudioBlob();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [textSegments, setTextSegments] = useState<TextSegmentLine[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -59,6 +64,17 @@ const RecordPage = () => {
     setCurrentIndex(0);
     setFileName(null);
   }, []);
+
+  const handleEditClick = useCallback(() => {
+    navigate("/edit");
+  }, [navigate]);
+
+  const handleRecordingComplete = useCallback(
+    (blob: Blob, mimeType: string) => {
+      setAudioBlob(blob, mimeType);
+    },
+    [setAudioBlob]
+  );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -177,7 +193,12 @@ const RecordPage = () => {
       </Container>
 
       {/* Recording Controls - Fixed position at bottom right */}
-      {hasData && <RecordingControls />}
+      {hasData && (
+        <RecordingControls
+          onEditClick={handleEditClick}
+          onRecordingComplete={handleRecordingComplete}
+        />
+      )}
     </Box>
   );
 };
