@@ -15,11 +15,12 @@ export interface RubyText {
 
 /**
  * テキストセグメント
- * プレーンテキストまたはルビ付きテキストのいずれか
+ * プレーンテキスト、ルビ付きテキスト、または改行のいずれか
  */
 export type TextSegment =
   | { type: "plain"; text: string }
-  | { type: "ruby"; data: RubyText };
+  | { type: "ruby"; data: RubyText }
+  | { type: "br" };
 
 /**
  * テキストセグメント行
