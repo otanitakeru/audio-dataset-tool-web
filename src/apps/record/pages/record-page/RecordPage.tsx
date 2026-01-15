@@ -6,6 +6,7 @@ import { Card } from "./components/Card";
 import { FileUploader } from "./components/FileUploader";
 import { NavigationButton } from "./components/NavigationButton";
 import { Progress } from "./components/Progress";
+import { RecordingControls } from "./components/RecordingControls";
 import { TextDisplay } from "./components/TextDisplay";
 
 const RecordPage = () => {
@@ -174,6 +175,9 @@ const RecordPage = () => {
           </Box>
         )}
       </Container>
+
+      {/* Recording Controls - Fixed position at bottom right */}
+      {hasData && <RecordingControls />}
     </Box>
   );
 };
