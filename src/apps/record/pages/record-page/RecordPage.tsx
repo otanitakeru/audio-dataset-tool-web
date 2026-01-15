@@ -1,14 +1,18 @@
-import { Box, Container, Typography } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Box, Button, Container, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { getTextSegments } from "../../data/mockData";
+import type { TextSegmentLine } from "../../types/textSegment";
 import { Card } from "./components/Card";
+import { FileUploader } from "./components/FileUploader";
 import { NavigationButton } from "./components/NavigationButton";
 import { Progress } from "./components/Progress";
 import { TextDisplay } from "./components/TextDisplay";
 
 const RecordPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const textSegments = getTextSegments();
+  const [textSegments, setTextSegments] = useState<TextSegmentLine[]>([]);
+  const [fileName, setFileName] = useState<string | null>(null);
+
   const hasData = textSegments.length > 0;
 
   const currentSegment = hasData ? textSegments[currentIndex] : [];
@@ -24,6 +28,36 @@ const RecordPage = () => {
       prev < textSegments.length - 1 ? prev + 1 : prev
     );
   }, [textSegments.length]);
+
+  const scrollToContent = useCallback(() => {
+    // HACK: ヘッダー分スクロールして隠すため、AppLayoutのscrollTo(0,0)と競合しないように少し遅延させる
+    const timer = setTimeout(() => {
+      const header = document.querySelector("header");
+      if (header) {
+        window.scrollTo({
+          top: header.clientHeight,
+          behavior: "smooth",
+        });
+      }
+    }, 100);
+    return timer;
+  }, []);
+
+  const handleFileLoad = useCallback(
+    (segments: TextSegmentLine[], name: string) => {
+      setTextSegments(segments);
+      setCurrentIndex(0);
+      setFileName(name);
+      scrollToContent();
+    },
+    [scrollToContent]
+  );
+
+  const handleReset = useCallback(() => {
+    setTextSegments([]);
+    setCurrentIndex(0);
+    setFileName(null);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -41,19 +75,9 @@ const RecordPage = () => {
   }, [handleNext, handlePrevious, hasData]);
 
   useEffect(() => {
-    // HACK: ヘッダー分スクロールして隠すため、AppLayoutのscrollTo(0,0)と競合しないように少し遅延させる
-    const timer = setTimeout(() => {
-      const header = document.querySelector("header");
-      if (header) {
-        window.scrollTo({
-          top: header.clientHeight,
-          behavior: "smooth",
-        });
-      }
-    }, 100);
-
+    const timer = scrollToContent();
     return () => clearTimeout(timer);
-  }, []);
+  }, [scrollToContent]);
 
   return (
     <Box
@@ -72,8 +96,38 @@ const RecordPage = () => {
           flexDirection: "column",
         }}
       >
-        {/* Status Header */}
-        <Progress current={currentIndex + 1} total={textSegments.length} />
+        {hasData ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            {fileName && (
+              <Typography variant="body2" color="text.secondary">
+                {fileName}
+              </Typography>
+            )}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<CloudUploadIcon />}
+              onClick={handleReset}
+              sx={{ ml: "auto" }}
+            >
+              別のファイルを読み込む
+            </Button>
+          </Box>
+        ) : (
+          <Box sx={{ mb: 2 }} />
+        )}
+
+        {/* Progress - centered */}
+        {hasData && (
+          <Progress current={currentIndex + 1} total={textSegments.length} />
+        )}
 
         {/* Main Content Area */}
         <Box
@@ -82,13 +136,13 @@ const RecordPage = () => {
             display: "flex",
             justifyContent: "center",
             gap: 4,
-            minHeight: 0, // フレックスアイテムの縮小を許可
+            minHeight: 0,
           }}
         >
           {/* Previous Button */}
           <NavigationButton
             onClick={handlePrevious}
-            disabled={isFirst}
+            disabled={isFirst || !hasData}
             direction="prev"
           />
 
@@ -99,30 +153,26 @@ const RecordPage = () => {
             </Card>
           ) : (
             <Card>
-              <Typography
-                variant="h4"
-                color="text.primary"
-                sx={{ textAlign: "center" }}
-              >
-                データをうまく読み込めませんでした。
-              </Typography>
+              <FileUploader onFileLoad={handleFileLoad} />
             </Card>
           )}
 
           {/* Next Button */}
           <NavigationButton
             onClick={handleNext}
-            disabled={isLast}
+            disabled={isLast || !hasData}
             direction="next"
           />
         </Box>
 
         {/* Helper Text */}
-        <Box sx={{ mt: 2, textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            キーボードの矢印キー（← →）でも操作できます
-          </Typography>
-        </Box>
+        {hasData && (
+          <Box sx={{ mt: 2, textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              キーボードの矢印キー（← →）でも操作できます
+            </Typography>
+          </Box>
+        )}
       </Container>
     </Box>
   );

@@ -7,7 +7,7 @@ type ProgressProps = {
 
 export const Progress = ({ current, total }: ProgressProps) => {
   return (
-    <Box sx={{ textAlign: "center", mb: 2 }}>
+    <Box sx={{ textAlign: "center", mb: 1 }}>
       <Typography variant="subtitle1" color="text.secondary">
         {total > 0 ? `${current} / ${total}` : "0 / 0"}
       </Typography>
