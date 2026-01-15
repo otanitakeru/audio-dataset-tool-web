@@ -10,7 +10,7 @@ import {
 
 interface FeatureCardProps {
   title: string;
-  description: string;
+  description?: string;
   icon: React.ReactNode;
   onClick: () => void;
   actionText: string;

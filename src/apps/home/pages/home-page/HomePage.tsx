@@ -23,6 +23,18 @@ const HomePage = () => {
             component="h1"
             sx={{
               fontWeight: 800,
+              background: `linear-gradient(45deg, ${theme.palette.primary.main} 20%, ${theme.palette.secondary.main} 60%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            READ App
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
               mb: 3,
               background: `linear-gradient(45deg, ${theme.palette.primary.main} 20%, ${theme.palette.secondary.main} 60%)`,
               WebkitBackgroundClip: "text",
@@ -30,7 +42,7 @@ const HomePage = () => {
               letterSpacing: "-0.02em",
             }}
           >
-            Audio Dataset Tool
+            (Recording and Editing for Audio Datasets Application)
           </Typography>
           <Typography
             variant="h5"
@@ -47,7 +59,6 @@ const HomePage = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <FeatureCard
               title="録音"
-              description="洗練された録音インターフェースで、高品質な音声サンプルを効率的に収録できます。"
               icon={<Mic sx={{ fontSize: 32 }} />}
               onClick={() => navigate("/record")}
               actionText="録音画面へ"
@@ -56,7 +67,6 @@ const HomePage = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <FeatureCard
               title="編集"
-              description="収録データの確認、テキストの修正、ファイルの整理を一元管理できます。"
               icon={<GraphicEq sx={{ fontSize: 32 }} />}
               onClick={() => navigate("/edit")}
               actionText="編集画面へ"
@@ -66,7 +76,6 @@ const HomePage = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <FeatureCard
                 title="デモ"
-                description="UIコンポーネントの動作確認や、各機能のインタラクティブなテストが行えます。"
                 icon={<PlayCircleOutline sx={{ fontSize: 32 }} />}
                 onClick={() => navigate("/demo")}
                 actionText="デモ画面へ"
