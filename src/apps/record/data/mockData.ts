@@ -27,5 +27,13 @@ export const getTextSegments = (): TextSegmentLine[] => {
       { type: "ruby", data: { base: "例", ruby: "れい" } },
       { type: "plain", text: "です。" },
     ],
+    [
+      { type: "ruby", data: { base: "高市", ruby: "たかいち" } },
+      { type: "ruby", data: { base: "早苗", ruby: "さなえ" } },
+      { type: "plain", text: "は" },
+      { type: "ruby", data: { base: "神戸大学", ruby: "こうべだいがく" } },
+      { type: "ruby", data: { base: "出身", ruby: "しゅっしん" } },
+      { type: "plain", text: "です。" },
+    ],
   ];
 };
