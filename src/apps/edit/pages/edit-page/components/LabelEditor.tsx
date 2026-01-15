@@ -173,7 +173,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
 
         regions.clearRegions();
         labelManager.getLabels().forEach((label) => {
-          const region = regions.addRegion({
+          regions.addRegion({
             id: label.id,
             start: label.start,
             end: label.end,
