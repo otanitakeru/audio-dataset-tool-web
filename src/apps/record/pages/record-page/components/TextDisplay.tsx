@@ -11,7 +11,6 @@ export const TextDisplay = ({ textSegments }: TextDisplayProps) => {
       sx={{
         typography: "h2",
         lineHeight: 2,
-        textAlign: "center",
         "& rt": {
           fontSize: "0.5em",
           color: "text.secondary",
@@ -19,16 +18,19 @@ export const TextDisplay = ({ textSegments }: TextDisplayProps) => {
       }}
     >
       {textSegments.map((segment, index) => {
-        if (segment.type === "plain") {
-          //   HACK: keyをindexとしている
-          return <span key={index}>{segment.text}</span>;
+        switch (segment.type) {
+          case "plain":
+            return <span key={index}>{segment.text}</span>;
+          case "ruby":
+            return (
+              <ruby key={index}>
+                {segment.data.base}
+                <rt>{segment.data.ruby}</rt>
+              </ruby>
+            );
+          case "br":
+            return <br key={index} />;
         }
-        return (
-          <ruby key={index}>
-            {segment.data.base}
-            <rt>{segment.data.ruby}</rt>
-          </ruby>
-        );
       })}
     </Box>
   );
