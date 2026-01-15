@@ -54,12 +54,15 @@ export const AudioBlobProvider = ({ children }: AudioBlobProviderProps) => {
   }, []);
 
   const clearAudioBlob = useCallback(() => {
-    if (previousUrlRef.current) {
-      URL.revokeObjectURL(previousUrlRef.current);
-      previousUrlRef.current = null;
+    if (audioBlob?.url) {
+      URL.revokeObjectURL(audioBlob.url);
     }
+    if (previousUrlRef.current && previousUrlRef.current !== audioBlob?.url) {
+      URL.revokeObjectURL(previousUrlRef.current);
+    }
+    previousUrlRef.current = null;
     setAudioBlobState(null);
-  }, []);
+  }, [audioBlob]);
 
   const value = useMemo<AudioBlobContextValue>(
     () => ({
