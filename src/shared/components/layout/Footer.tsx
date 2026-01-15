@@ -39,7 +39,7 @@ const Footer = () => {
 
         <Typography variant="body2" color="text.secondary" align="center">
           {"Copyright © "}
-          Audio Dataset Tool {new Date().getFullYear()}
+          READ App {new Date().getFullYear()}
           {"."}
         </Typography>
       </Container>
