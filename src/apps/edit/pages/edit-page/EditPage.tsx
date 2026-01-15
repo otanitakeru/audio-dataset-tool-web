@@ -10,7 +10,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAudioBlob } from "../../../../shared/contexts/AudioBlobContext";
 import { mockLabels } from "../../constants/mockLabels";
 import { ZOOM_SETTINGS } from "../../constants/settings";
 import { useEditShortcuts } from "../../hooks/useEditShortcuts";
@@ -25,11 +26,15 @@ import type { WaveformEditorRef } from "./components/WaveformEditor";
 import { WaveformEditor } from "./components/WaveformEditor";
 
 const EditPage: React.FC = () => {
+  // Context
+  const { audioBlob } = useAudioBlob();
+
   // Refs
   const waveformEditorRef = useRef<WaveformEditorRef>(null);
   const labelEditorRef = useRef<LabelEditorRef>(null);
   const labelManagerRef = useRef(new LabelManager(mockLabels));
   const currentAudioUrlRef = useRef<string | null>(null);
+  const hasLoadedFromContextRef = useRef(false);
 
   // State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,6 +53,37 @@ const EditPage: React.FC = () => {
     id: string;
     name: string;
   } | null>(null);
+
+  // Contextからのオーディオ自動読み込み
+  useEffect(() => {
+    // 既に読み込み済み、またはContextにオーディオがない場合はスキップ
+    if (hasLoadedFromContextRef.current || !audioBlob?.blob) {
+      return;
+    }
+
+    // Blobから新しいURLを生成
+    const freshUrl = URL.createObjectURL(audioBlob.blob);
+
+    // WaveformEditorが準備できたら読み込む
+    const loadFromContext = () => {
+      if (waveformEditorRef.current) {
+        hasLoadedFromContextRef.current = true;
+        currentAudioUrlRef.current = freshUrl;
+        waveformEditorRef.current.load(freshUrl);
+      }
+    };
+
+    // コンポーネントマウント直後はrefがnullの可能性があるため少し待つ
+    const timer = setTimeout(loadFromContext, 100);
+
+    return () => {
+      clearTimeout(timer);
+      // 読み込みが完了していない場合はURLを解放
+      if (!hasLoadedFromContextRef.current) {
+        URL.revokeObjectURL(freshUrl);
+      }
+    };
+  }, [audioBlob]);
 
   // ファイル読み込みハンドラー
   // オーディオファイルが選択されたときに実行される。

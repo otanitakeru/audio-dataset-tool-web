@@ -3,15 +3,18 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter } from "react-router-dom";
 import AppRouter from "./router.tsx";
+import { AudioBlobProvider } from "./shared/contexts/AudioBlobContext";
 import { theme } from "./theme.ts";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <HashRouter>
-        <CssBaseline />
-        <AppRouter />
-      </HashRouter>
+      <AudioBlobProvider>
+        <HashRouter>
+          <CssBaseline />
+          <AppRouter />
+        </HashRouter>
+      </AudioBlobProvider>
     </ThemeProvider>
   </StrictMode>
 );
