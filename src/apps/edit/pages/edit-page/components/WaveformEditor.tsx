@@ -63,7 +63,7 @@ export const WaveformEditor = forwardRef<
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const regionsPluginRef = useRef<RegionsPlugin | null>(null);
 
-    const [waveformHeight, setWaveformHeight] = useState(200);
+    const [waveformHeight, setWaveformHeight] = useState(300);
     const [playbackStartPosition, setPlaybackStartPosition] =
       useState<number>(0);
     const [isReady, setIsReady] = useState(false);

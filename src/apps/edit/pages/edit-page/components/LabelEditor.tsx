@@ -29,12 +29,22 @@ interface LabelEditorProps {
   onLabelEdit: (id: string, currentName: string) => void;
 }
 
+// ラベルのcontent要素を作成するヘルパー関数
+const createLabelContent = (name: string): HTMLElement => {
+  const el = document.createElement("span");
+  el.textContent = name;
+  el.style.fontSize = "25px";
+  el.style.fontWeight = "500";
+  el.style.padding = "2px 4px";
+  return el;
+};
+
 export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
   ({ zoomLevel, labelManager, onLabelEdit }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const regionsPluginRef = useRef<RegionsPlugin | null>(null);
-    const [trackHeight, setTrackHeight] = useState(50);
+    const [trackHeight, setTrackHeight] = useState(150);
     const regionCleanups = useRef<Map<string, () => void>>(new Map());
 
     const registerRegionEvents = useCallback((region: any) => {
@@ -105,7 +115,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           id: newLabel.id,
           start: newLabel.start,
           end: newLabel.end,
-          content: newLabel.name,
+          content: createLabelContent(newLabel.name),
           color: "rgba(0, 123, 255, 0.1)",
           drag: true,
           resize: true,
@@ -118,7 +128,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           ?.getRegions()
           .find((r) => r.id === id);
         if (region) {
-          region.setOptions({ content: name });
+          region.setOptions({ content: createLabelContent(name) });
         }
       },
       removeLabel: (id: string) => {
@@ -177,7 +187,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
             id: label.id,
             start: label.start,
             end: label.end,
-            content: label.name,
+            content: createLabelContent(label.name),
             color: "rgba(0, 123, 255, 0.1)",
             drag: true,
             resize: true,
@@ -252,6 +262,7 @@ export const LabelEditor = forwardRef<LabelEditorRef, LabelEditorProps>(
           position: "relative",
           border: "1px solid #ccc",
           bgcolor: "#f0f0f0", // ラベルトラックの背景色
+
         }}
       >
         <GlobalStyles
