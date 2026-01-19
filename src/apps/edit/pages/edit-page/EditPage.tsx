@@ -194,10 +194,10 @@ const EditPage: React.FC = () => {
   });
 
   return (
-    <Box sx={{ p: 4, maxWidth: "1200px", margin: "0 auto" }}>
+    <Box sx={{ p: 10, margin: "0 10"}}>
       <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
         {/* コントロールエリア */}
-        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+        <Stack direction="row" spacing={2} alignItems="center" mb={2} >
           <Button
             variant="contained"
             component="label"
